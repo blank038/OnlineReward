@@ -1,0 +1,11 @@
+name: OnlineReward
+main: com.blank038.onlinereward.Main
+version: ${version}
+api-version: 1.13
+depend:
+  - AyCore
+softdepend:
+  - PlaceholderAPI
+commands:
+  or:
+    descrption: Command for OnlineReward

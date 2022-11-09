@@ -1,0 +1,161 @@
+Inventory:
+  size: 54
+  title: "&8&n每日在线奖励"
+Items:
+  head:
+    type: SKULL_ITEM
+    amount: 1
+    data: 3
+    name: "&a个人信息"
+    lore:
+      - " "
+      - " &e今日在线: &f%onlinereward_day%分钟 "
+      - " &e总在线: &f%onlinereward_all%分钟 "
+      - " "
+    slot: 49
+  fg:
+    type: STAINED_GLASS_PANE
+    amount: 1
+    data: 15
+    name: "&f"
+    lore: [ ]
+    slots: 0-9,17,18,26,27,35,36,44-53
+  30f:
+    type: DRAGONS_BREATH
+    data: 0
+    amount: 3
+    name: "&a30分钟"
+    lore:
+      - " "
+      - " &b奖励列表:"
+      - " &f ◈ 精灵球 x32 "
+      - " &f ◈ 金币 x1000 "
+      - " &f ◈ 钻石 x10 "
+      - " &f ◈ &e飞行能量 x100 "
+      - " "
+      - " &a点击领取该奖励&f(%status%&f) "
+      - " "
+    slot: 20
+    online: 30
+    commands:
+      - "give %player% PIXELMON_POKE_BALL 32"
+      - "money give %player% 1000"
+      - "nye give %player% 钻石 10"
+      - "flightcharge add %player% 100"
+    permission: "or.vip.30f"
+  60f:
+    type: DRAGONS_BREATH
+    data: 0
+    amount: 6
+    name: "&a60分钟"
+    lore:
+      - " "
+      - " &b奖励列表:"
+      - " &f ◈ 精灵球 x32 "
+      - " &f ◈ 金币 x2000 "
+      - " &f ◈ 钻石 x20 "
+      - " &f ◈ &e飞行能量 x200 "
+      - " "
+      - " &a点击领取该奖励&f(%status%&f) "
+      - " "
+    slot: 22
+    online: 60
+    commands:
+      - "give %player% PIXELMON_POKE_BALL 32"
+      - "money give %player% 2000"
+      - "nye give %player% 钻石 20"
+      - "flightcharge add %player% 200"
+  90f:
+    type: DRAGONS_BREATH
+    data: 0
+    amount: 9
+    name: "&a90分钟"
+    lore:
+      - " "
+      - " &b奖励列表:"
+      - " &f ◈ 精灵球 x32 "
+      - " &f ◈ 金币 x3000 "
+      - " &f ◈ 钻石 x30 "
+      - " &f ◈ &e飞行能量 x300 "
+      - " "
+      - " &a点击领取该奖励&f(%status%&f) "
+      - " "
+    slot: 24
+    online: 90
+    commands:
+      - "give %player% PIXELMON_POKE_BALL 32"
+      - "money give %player% 3000"
+      - "nye give %player% 钻石 30"
+      - "flightcharge add %player% 300"
+  120f:
+    type: DRAGONS_BREATH
+    data: 0
+    amount: 12
+    name: "&a120分钟"
+    lore:
+      - " "
+      - " &b奖励列表:"
+      - " &f ◈ 精灵球 x32 "
+      - " &f ◈ 金币 x4000 "
+      - " &f ◈ 钻石 x40 "
+      - " &f ◈ &e飞行能量 x500 "
+      - " "
+      - " &a点击领取该奖励&f(%status%&f) "
+      - " "
+    slot: 29
+    online: 120
+    commands:
+      - "give %player% PIXELMON_POKE_BALL 32"
+      - "money give %player% 4000"
+      - "nye give %player% 钻石 40"
+      - "flightcharge add %player% 500"
+  150f:
+    type: DRAGONS_BREATH
+    data: 0
+    amount: 150
+    name: "&a150分钟"
+    lore:
+      - " "
+      - " &b奖励列表:"
+      - " &f ◈ 精灵球 x32 "
+      - " &f ◈ 金币 x5000 "
+      - " &f ◈ 钻石 x50 "
+      - " &f ◈ &b体力药丸&f(小) x1 "
+      - " &f ◈ &e飞行能量 x700 "
+      - " "
+      - " &a点击领取该奖励&f(%status%&f) "
+      - " "
+    slot: 31
+    online: 150
+    commands:
+      - "give %player% PIXELMON_POKE_BALL 32"
+      - "money give %player% 5000"
+      - "nye give %player% 钻石 50"
+      - "saveditems get tlx"
+      - "flightcharge add %player% 700"
+  180f:
+    type: DRAGONS_BREATH
+    data: 0
+    amount: 18
+    name: "&a180分钟"
+    lore:
+      - " "
+      - " &b奖励列表:"
+      - " &f ◈ 精灵球 x32 "
+      - " &f ◈ 金币 x6000 "
+      - " &f ◈ 钻石 x60 "
+      - " &f ◈ &6体力药丸&f(大) x1 "
+      - " &f ◈ &d补签卡 x1 "
+      - " &f ◈ &e飞行能量 x1000 "
+      - " "
+      - " &a点击领取该奖励&f(%status%&f) "
+      - " "
+    slot: 33
+    online: 180
+    commands:
+      - "give %player% PIXELMON_POKE_BALL 32"
+      - "money give %player% 6000"
+      - "nye give %player% 钻石 60"
+      - "givetoken %player% 1"
+      - "saveditems get tld"
+      - "flightcharge add %player% 1000"

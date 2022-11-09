@@ -1,0 +1,51 @@
+# 存储方式, 可选: YAML, MYSQL 默认 YAML
+save-option:
+  type: YAML
+  # MySQL的URL，例如jdbc:mysql://127.0.0.1/minecraft 格式：jdbc:mysql://MySQL地址/数据库名
+  url: jdbc:mysql://localhost/minecraft
+  # 数据库用户名
+  user: "root"
+  # 数据库密码
+  password: "root"
+  # 数据库读取超时打开数据锁时长, 2 = 1秒
+  time-out: 120
+  # 同步提示
+  pull-notify: false
+# 提示文本
+message:
+  prefix: "&6在线奖励 &f"
+  on-sync: "请等待同步结束."
+  sync_pull: "&f正在同步在线奖励数据, 请稍等!"
+  sync_finish: "&f同步完成."
+  pls_wait_sync: "请等待同步结束."
+  reward_info:
+    - "§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-"
+    - " "
+    - "%reward%"
+    - " "
+    - "§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-"
+  reward_line: "%name%&f: %status%"
+  reward_status:
+    gotten: "&a已领取"
+    wait: "%day%天%hour%时%minute%分%second%秒"
+    no_reward: "&7 暂无任何在线奖励可领取"
+  in_reset: "&f数据重置中, 请耐心等待!"
+  gotten_reward: "&b成功领取奖励！"
+  ara: "&c已领取过或条件未达！"
+  receive_award: "&a成功获得在线奖励: &f%name%"
+  permission-denied: "你没有权限领取这个奖励."
+  reload: "插件配置重载完成!"
+# 奖励状态设定
+reward-status:
+  1: "&a已领取"
+  2: "&e待领取"
+  3: "&c条件不足"
+# PlaceholderAPI 展示格式
+papi-format: "%d% 天 %h% 时 %m% 分 %s% 秒"
+# 奖励列表, 每个礼包玩家都只能领取一次
+rewards:
+  test:
+    time: 7200
+    name: "&c国庆厚礼"
+    commands:
+      - "pe %player% 6 1"
