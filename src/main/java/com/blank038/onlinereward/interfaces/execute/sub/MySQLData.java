@@ -13,8 +13,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.bukkit.entity.Player;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -81,10 +79,8 @@ public class MySQLData extends DataInterface {
 
     @Override
     public void save(PlayerData data, boolean locked) {
-        Date date = new Date(System.currentTimeMillis());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("day", data.getDayTime());
+        jsonObject.addProperty("day", data.getDailyOnline());
         jsonObject.addProperty("time", data.getOnlineTime());
         // 读取奖励
         JsonArray rewards = new JsonArray();
@@ -93,9 +89,7 @@ public class MySQLData extends DataInterface {
         JsonArray dayRewards = new JsonArray();
         data.getDayRewards().forEach(dayRewards::add);
         jsonObject.add("dayRewards", dayRewards);
-        if (data.getResetDay() != null) {
-            jsonObject.addProperty("date", sdf.format(date));
-        }
+        jsonObject.addProperty("dayOfYear", data.getResetDayOfYear());
         String text = Base64Util.encode(jsonObject);
         connect((connection, statement) -> {
             String sql;
@@ -119,8 +113,6 @@ public class MySQLData extends DataInterface {
             return CommonData.DATA_MAP.get(name);
         }
         AtomicReference<JsonObject> jsonObject = new AtomicReference<>();
-        Date date = new Date(System.currentTimeMillis());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
         connect((connection, statement) -> {
             String sql = String.format("SELECT data FROM onlinereward WHERE user='%s'", name);
             try {
@@ -140,7 +132,6 @@ public class MySQLData extends DataInterface {
             JsonObject object = new JsonObject();
             object.addProperty("day", 0);
             object.addProperty("time", 0);
-            object.addProperty("date", sdf.format(date));
             object.addProperty("isNew", true);
             object.add("rewards", new JsonArray());
             object.add("dayRewards", new JsonArray());

@@ -20,14 +20,14 @@ public class OnlineRewardAPI {
     }
 
     public int getPlayerDayTime(String name) {
-        return (CommonData.DATA_MAP.containsKey(name) ? CommonData.DATA_MAP.get(name).getDayTime() : this.getPlayerData(name, "Day"));
+        return (CommonData.DATA_MAP.containsKey(name) ? CommonData.DATA_MAP.get(name).getDailyOnline() : this.getPlayerData(name, "Day"));
     }
 
     public int getPlayerData(String name, String key) {
         PlayerData data = Main.getInstance().getDataInterface().get(name);
         switch (key) {
             case "Day":
-                return data.getDayTime();
+                return data.getDailyOnline();
             case "Time":
                 return data.getOnlineTime();
             default:

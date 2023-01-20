@@ -23,8 +23,8 @@ public class YamlData extends DataInterface {
             FileConfiguration data = YamlConfiguration.loadConfiguration(f);
             data.set("Time", pd.getOnlineTime());
             data.set("Rewards", pd.getRewards());
-            data.set("Day", pd.getDayTime());
-            data.set("date", pd.getResetDay());
+            data.set("Day", pd.getDailyOnline());
+            data.set("dayOfYear", pd.getResetDayOfYear());
             data.set("DayRewards", pd.getDayRewards());
             data.save(f);
         } catch (IOException e) {

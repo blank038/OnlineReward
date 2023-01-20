@@ -39,7 +39,7 @@ public class RewardGui {
         model.registerListener(Main.getInstance());
         model.setCloseRemove(true);
         if (data.getKeys(false).contains("Items")) {
-            int onlineTime = playerData.getDayTime() / 60;
+            int onlineTime = playerData.getDailyOnline() / 60;
             for (String key : data.getConfigurationSection("Items").getKeys(false)) {
                 ItemStack itemStack = new ItemStack(RewardGui.getMaterial(data.getString("Items." + key + ".type")),
                         data.getInt("Items." + key + ".amount"), (short) data.getInt("Items." + key + ".data"));
