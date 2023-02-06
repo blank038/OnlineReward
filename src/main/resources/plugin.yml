@@ -4,6 +4,7 @@ version: ${version}
 api-version: 1.13
 depend:
   - AyCore
+  - NBTAPI
 softdepend:
   - PlaceholderAPI
 commands:
