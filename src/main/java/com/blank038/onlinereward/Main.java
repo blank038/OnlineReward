@@ -8,9 +8,6 @@ import com.blank038.onlinereward.hook.PlaceholderHook;
 import com.blank038.onlinereward.interfaces.execute.DataInterface;
 import com.blank038.onlinereward.interfaces.execute.sub.MySQLData;
 import com.blank038.onlinereward.interfaces.execute.sub.YamlData;
-import com.blank038.onlinereward.interfaces.nms.BaseNMSControl;
-import com.blank038.onlinereward.interfaces.nms.impl.CommonNmsControlImpl;
-import com.blank038.onlinereward.interfaces.nms.impl.SlowNmsControlImpl;
 import com.blank038.onlinereward.listener.PlayerListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,6 +17,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * @author Blank038
@@ -28,7 +27,6 @@ public class Main extends JavaPlugin {
     private static Main main;
     private static OnlineRewardAPI orApi;
     public DataInterface dataInterface;
-    public BaseNMSControl nmsModel;
     public FileConfiguration guiData;
 
     public static Main getInstance() {
@@ -49,14 +47,19 @@ public class Main extends JavaPlugin {
         orApi = new OnlineRewardAPI();
         this.loadConfig();
         // 判断存储类型, 初始化存储对象
-        dataInterface = getConfig().getString("save-option.type").equalsIgnoreCase("MYSQL") ? new MySQLData() : new YamlData();
-        // 判断服务器版本
-        if (Bukkit.getServer().getName().contains("CatServer")) {
-            this.nmsModel = new SlowNmsControlImpl();
-        } else {
-            this.nmsModel = new CommonNmsControlImpl();
-        }
-        this.nmsModel.runTask();
+        dataInterface = "MYSQL".equalsIgnoreCase(getConfig().getString("save-option.type")) ? new MySQLData() : new YamlData();
+        Bukkit.getScheduler().runTaskTimerAsynchronously(Main.getInstance(), () -> {
+            for (Map.Entry<String, PlayerData> entry : new HashSet<>(CommonData.DATA_MAP.entrySet())) {
+                entry.getValue().addTime();
+                entry.getValue().checkRewards();
+                entry.getValue().checkResetDate();
+            }
+        }, 20L, 20L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(Main.getInstance(), () -> {
+            for (Map.Entry<String, PlayerData> entry : new HashSet<>(CommonData.DATA_MAP.entrySet())) {
+                entry.getValue().save(true);
+            }
+        }, 1200L, 1200L);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceholderHook().register();

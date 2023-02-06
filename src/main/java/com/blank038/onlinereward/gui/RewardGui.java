@@ -7,7 +7,7 @@ import com.blank038.onlinereward.api.event.PlayerGetRewardEvent;
 import com.blank038.onlinereward.data.CommonData;
 import com.blank038.onlinereward.data.PlayerData;
 import com.blank038.onlinereward.hook.PlaceholderHook;
-import com.blank038.onlinereward.interfaces.nms.NBTData;
+import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -60,7 +60,9 @@ public class RewardGui {
                 itemMeta.setLore(itemLore);
                 itemStack.setItemMeta(itemMeta);
                 if (onlineKey > 0) {
-                    itemStack = Main.getInstance().nmsModel.addNbtData(itemStack, key, onlineKey);
+                    NBTItem nbtItem = new NBTItem(itemStack);
+                    nbtItem.setInteger(key, onlineKey);
+                    itemStack = nbtItem.getItem();
                 }
                 if (data.isList("Items." + key + ".slots")) {
                     for (int slot : data.getIntegerList("Items." + key + ".slots")) {
@@ -82,14 +84,14 @@ public class RewardGui {
                 if (itemStack == null || itemStack.getType().equals(Material.AIR)) {
                     return;
                 }
-                NBTData nbtTagCompound = Main.getInstance().nmsModel.nbtToData(itemStack);
+                NBTItem nbtItem = new NBTItem(itemStack);
                 // 判断该物品是否有对应的NBT数据
-                if (nbtTagCompound.getKey() != null) {
+                if (nbtItem.getString("RewardKey") != null) {
                     Player clicker = (Player) e.getWhoClicked();
                     if (CommonData.DATA_MAP.containsKey(clicker.getName())) {
-                        int onlineRewardTime = nbtTagCompound.getAmount();
+                        int onlineRewardTime = nbtItem.getInteger("OnlineReward");
                         int onlineTime = Main.getApi().getPlayerDayTime(clicker.getName()) / 60;
-                        String key = nbtTagCompound.getKey(), permission = Main.getInstance().guiData.getString("Items." + key + ".permission");
+                        String key = nbtItem.getString("RewardKey"), permission = Main.getInstance().guiData.getString("Items." + key + ".permission");
                         if (permission != null && !permission.isEmpty() && !player.hasPermission(permission)) {
                             clicker.sendMessage(Main.getString("message.permission-denied", true));
                             return;

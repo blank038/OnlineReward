@@ -7,7 +7,7 @@ import org.bukkit.event.HandlerList;
 
 public class PlayerGetRewardEvent extends Event
         implements Cancellable {
-    private final static HandlerList handler = new HandlerList();
+    private final static HandlerList HANDLER = new HandlerList();
     private final Player player;
     private final String rewardKey;
     private boolean cancell;
@@ -27,11 +27,11 @@ public class PlayerGetRewardEvent extends Event
 
     @Override
     public HandlerList getHandlers() {
-        return handler;
+        return HANDLER;
     }
 
-    public HandlerList getHandlerList() {
-        return handler;
+    public static HandlerList getHandlerList() {
+        return HANDLER;
     }
 
     @Override

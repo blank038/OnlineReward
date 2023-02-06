@@ -10,5 +10,4 @@ import java.util.Map;
  */
 public class CommonData {
     public static final Map<String, PlayerData> DATA_MAP = new HashMap<>();
-    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
 }
