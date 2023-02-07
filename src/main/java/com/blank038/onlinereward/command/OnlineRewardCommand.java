@@ -52,10 +52,10 @@ public class OnlineRewardCommand implements CommandExecutor {
                 } else {
                     sender.sendMessage(Main.getString("message.on-sync", true));
                 }
-            } else if (args[0].equalsIgnoreCase("reload") && sender.hasPermission("onlinereward.admin")) {
+            } else if ("reload".equalsIgnoreCase(args[0]) && sender.hasPermission("onlinereward.admin")) {
                 this.instance.loadConfig();
                 sender.sendMessage(Main.getString("message.reload", true));
-            } else if (args[0].equalsIgnoreCase("open")) {
+            } else if ("open".equalsIgnoreCase(args[0])) {
                 RewardGui.open((Player) sender);
             }
         } else {

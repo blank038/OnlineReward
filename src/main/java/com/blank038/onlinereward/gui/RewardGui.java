@@ -46,11 +46,11 @@ public class RewardGui {
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 itemMeta.setDisplayName(data.getString("Items." + key + ".name").replace("&", "§"));
                 List<String> itemLore = new ArrayList<>();
-                int onlineKey = data.getInt("Items." + key + ".online");
+                int rewardOnlineCondition = data.getInt("Items." + key + ".online");
                 // 获取领取状态
                 String status = "";
-                if (onlineKey > 0) {
-                    status = Main.getString("reward-status." + (onlineTime >= onlineKey
+                if (rewardOnlineCondition > 0) {
+                    status = Main.getString("reward-status." + (rewardOnlineCondition >= rewardOnlineCondition
                             ? (playerData.hasDayReward(key) ? "1" : 2) : "3"));
                 }
                 for (String lore : data.getStringList("Items." + key + ".lore")) {
@@ -59,9 +59,10 @@ public class RewardGui {
                 }
                 itemMeta.setLore(itemLore);
                 itemStack.setItemMeta(itemMeta);
-                if (onlineKey > 0) {
+                if (rewardOnlineCondition > 0) {
                     NBTItem nbtItem = new NBTItem(itemStack);
-                    nbtItem.setInteger(key, onlineKey);
+                    nbtItem.setString("RewardKey", key);
+                    nbtItem.setInteger("OnlineReward", rewardOnlineCondition);
                     itemStack = nbtItem.getItem();
                 }
                 if (data.isList("Items." + key + ".slots")) {
