@@ -34,6 +34,8 @@ message:
   ara: "&c已领取过或条件未达！"
   receive_award: "&a成功获得在线奖励: &f%name%"
   permission-denied: "你没有权限领取这个奖励."
+  not-have-perms: "你没有权限这么做."
+  need_empty_slots: "背包需要有 %count% 个空槽才能领取这个奖励."
   reload: "插件配置重载完成!"
 # 奖励状态设定
 reward-status:
@@ -42,6 +44,11 @@ reward-status:
   3: "&c条件不足"
 # PlaceholderAPI 展示格式
 papi-format: "%d% 天 %h% 时 %m% 分 %s% 秒"
+# PlaceholderAPI 自定义变量
+placeholder:
+  gotten:
+    yes: "已领取"
+    no: "条件不满足或未领取"
 # 奖励列表, 每个礼包玩家都只能领取一次
 rewards:
   test:

@@ -1,6 +1,5 @@
-package com.blank038.onlinereward.data;
+package com.blank038.onlinereward.data.cache;
 
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 

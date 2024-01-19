@@ -1,8 +1,8 @@
 package com.blank038.onlinereward.interfaces.execute.sub;
 
-import com.blank038.onlinereward.Main;
-import com.blank038.onlinereward.data.CommonData;
-import com.blank038.onlinereward.data.PlayerData;
+import com.blank038.onlinereward.OnlineReward;
+import com.blank038.onlinereward.data.cache.CommonData;
+import com.blank038.onlinereward.data.cache.PlayerData;
 import com.blank038.onlinereward.interfaces.execute.DataInterface;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -19,7 +19,7 @@ public class YamlData extends DataInterface {
     @Override
     public void save(PlayerData pd, boolean locked) {
         try {
-            File f = new File(Main.getInstance().getDataFolder() + "/Data/", pd.getName() + ".yml");
+            File f = new File(OnlineReward.getInstance().getDataFolder() + "/Data/", pd.getName() + ".yml");
             FileConfiguration data = YamlConfiguration.loadConfiguration(f);
             data.set("Time", pd.getOnlineTime());
             data.set("Rewards", pd.getRewards());

@@ -1,6 +1,6 @@
 package com.blank038.onlinereward.interfaces.execute;
 
-import com.blank038.onlinereward.data.PlayerData;
+import com.blank038.onlinereward.data.cache.PlayerData;
 import org.bukkit.entity.Player;
 
 import java.sql.Connection;

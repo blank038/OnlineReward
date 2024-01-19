@@ -2,8 +2,8 @@ package com.blank038.onlinereward.listener;
 
 import com.aystudio.core.bukkit.thread.BlankThread;
 import com.aystudio.core.bukkit.thread.ThreadProcessor;
-import com.blank038.onlinereward.Main;
-import com.blank038.onlinereward.data.CommonData;
+import com.blank038.onlinereward.OnlineReward;
+import com.blank038.onlinereward.data.cache.CommonData;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,9 +16,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
  * @since 1.3.9-SNAPSHOT
  */
 public class PlayerListener implements Listener {
-    private final Main main;
+    private final OnlineReward main;
 
-    public PlayerListener(Main main) {
+    public PlayerListener(OnlineReward main) {
         this.main = main;
     }
 
@@ -32,7 +32,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         if (main.getConfig().getBoolean("save-option.pull-notify")) {
-            e.getPlayer().sendMessage(Main.getString("message.sync_pull", true));
+            e.getPlayer().sendMessage(OnlineReward.getString("message.sync_pull", true));
         }
         // 创建线程
         ThreadProcessor.crateTask(main, new BlankThread(10) {
@@ -41,7 +41,7 @@ public class PlayerListener implements Listener {
             @Override
             public void run() {
                 Player player = e.getPlayer();
-                if (!main.dataInterface.isLocked(player)) {
+                if (!main.getDataInterface().isLocked(player)) {
                     loadData(player);
                     this.cancel();
                 } else {
@@ -56,10 +56,10 @@ public class PlayerListener implements Listener {
     }
 
     private void loadData(Player player) {
-        main.dataInterface.setLocked(player, true);
-        CommonData.DATA_MAP.put(player.getName(), main.dataInterface.get(player.getName()));
+        main.getDataInterface().setLocked(player, true);
+        CommonData.DATA_MAP.put(player.getName(), main.getDataInterface().get(player.getName()));
         if (main.getConfig().getBoolean("save-option.pull-notify")) {
-            player.sendMessage(Main.getString("message.sync_finish", true));
+            player.sendMessage(OnlineReward.getString("message.sync_finish", true));
         }
     }
 }

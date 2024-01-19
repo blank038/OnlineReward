@@ -1,8 +1,8 @@
 package com.blank038.onlinereward.interfaces.execute.sub;
 
-import com.blank038.onlinereward.Main;
-import com.blank038.onlinereward.data.CommonData;
-import com.blank038.onlinereward.data.PlayerData;
+import com.blank038.onlinereward.OnlineReward;
+import com.blank038.onlinereward.data.cache.CommonData;
+import com.blank038.onlinereward.data.cache.PlayerData;
 import com.blank038.onlinereward.interfaces.execute.DataInterface;
 
 import java.sql.*;
@@ -19,8 +19,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author Blank038
  */
 public class MySQLData extends DataInterface {
-    private final String user = Main.getInstance().getConfig().getString("save-option.user"), url = Main.getInstance().getConfig().getString("save-option.url"),
-            password = Main.getInstance().getConfig().getString("save-option.password");
+    private final String user = OnlineReward.getInstance().getConfig().getString("save-option.user"), url = OnlineReward.getInstance().getConfig().getString("save-option.url"),
+            password = OnlineReward.getInstance().getConfig().getString("save-option.password");
 
     public MySQLData() {
         try {

@@ -1,7 +1,8 @@
-package com.blank038.onlinereward.data;
+package com.blank038.onlinereward.data.cache;
 
-import com.blank038.onlinereward.Main;
+import com.blank038.onlinereward.OnlineReward;
 import com.blank038.onlinereward.api.event.PlayerGetRewardEvent;
+import com.blank038.onlinereward.util.PlayerUtil;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
@@ -11,7 +12,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,19 +27,9 @@ public class PlayerData {
     private boolean isNew;
 
     public PlayerData(String name) {
-        File f = new File(Main.getInstance().getDataFolder() + "/Data/", name + ".yml");
+        File f = new File(OnlineReward.getInstance().getDataFolder() + "/Data/", name + ".yml");
         FileConfiguration data = YamlConfiguration.loadConfiguration(f);
         this.name = name;
-        if (!f.exists()) {
-            try {
-                f.createNewFile();
-                data.set("Time", 0);
-                data.set("Rewards", new ArrayList<>());
-                data.set("DayRewards", new ArrayList<>());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
         this.rewards = data.getStringList("Rewards");
         this.dayRewards = data.getStringList("DayRewards");
         this.onlineTotal = data.getInt("Time");
@@ -125,38 +115,30 @@ public class PlayerData {
     }
 
     public void checkRewards() {
-        if (Main.getInstance().getConfig().contains("rewards")) {
-            Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
-                ConfigurationSection section = Main.getInstance().getConfig().getConfigurationSection("rewards");
-                Player player = this.getPlayer();
-                synchronized (this.rewards) {
-                    for (String key : section.getKeys(false)) {
-                        if (!PlayerData.this.rewards.contains(key) && PlayerData.this.onlineTotal >= section.getInt(key + ".time")) {
-                            PlayerGetRewardEvent event = new PlayerGetRewardEvent(player, key);
-                            Bukkit.getPluginManager().callEvent(event);
-                            if (event.isCancelled()) {
-                                return;
-                            }
-                            PlayerData.this.rewards.add(key);
-                            Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
-                                if (player != null && player.isOnline()) {
-                                    player.sendMessage(Main.getString("message.receive_award", true)
-                                            .replace("%name%", section.getString(key + ".name").replace("&", "§")));
-                                }
-                                for (String command : section.getStringList(key + ".commands")) {
-                                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", PlayerData.this.name));
-                                }
-                            });
-                        }
+        if (OnlineReward.getInstance().getConfig().contains("rewards")) {
+            ConfigurationSection section = OnlineReward.getInstance().getConfig().getConfigurationSection("rewards");
+            Player player = this.getPlayer();
+            for (String key : section.getKeys(false)) {
+                if (!PlayerData.this.rewards.contains(key) && PlayerData.this.onlineTotal >= section.getInt(key + ".time")) {
+                    PlayerGetRewardEvent event = new PlayerGetRewardEvent(player, key);
+                    Bukkit.getPluginManager().callEvent(event);
+                    if (event.isCancelled()) {
+                        return;
                     }
+                    PlayerData.this.rewards.add(key);
+                    if (player != null && player.isOnline()) {
+                        player.sendMessage(OnlineReward.getString("message.receive_award", true)
+                                .replace("%name%", section.getString(key + ".name").replace("&", "§")));
+                    }
+                    PlayerUtil.performConsoleCommands(player, section.getStringList(key + ".commands"));
                 }
-            });
+            }
         }
     }
 
     public void checkResetDate() {
         LocalDateTime localDateTime = LocalDateTime.now();
-        if (localDateTime.getDayOfYear() != this.resetOfDay && (localDateTime.getHour() > 0 || localDateTime.getMinute() >= 10)) {
+        if (localDateTime.getDayOfYear() != this.resetOfDay) {
             synchronized (this.rewards) {
                 this.dayRewards.clear();
                 this.setDailyOnline(0);
@@ -171,7 +153,7 @@ public class PlayerData {
     }
 
     public void save(boolean locked) {
-        Main.getInstance().getDataInterface().save(this, locked);
+        OnlineReward.getInstance().getDataInterface().save(this, locked);
         this.isNew = false;
     }
 }

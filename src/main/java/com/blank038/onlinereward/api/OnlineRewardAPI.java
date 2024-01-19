@@ -1,8 +1,8 @@
 package com.blank038.onlinereward.api;
 
-import com.blank038.onlinereward.Main;
-import com.blank038.onlinereward.data.CommonData;
-import com.blank038.onlinereward.data.PlayerData;
+import com.blank038.onlinereward.OnlineReward;
+import com.blank038.onlinereward.data.cache.CommonData;
+import com.blank038.onlinereward.data.cache.PlayerData;
 
 /**
  * @author Blank038
@@ -24,7 +24,7 @@ public class OnlineRewardAPI {
     }
 
     public int getPlayerData(String name, String key) {
-        PlayerData data = Main.getInstance().getDataInterface().get(name);
+        PlayerData data = OnlineReward.getInstance().getDataInterface().get(name);
         switch (key) {
             case "Day":
                 return data.getDailyOnline();
