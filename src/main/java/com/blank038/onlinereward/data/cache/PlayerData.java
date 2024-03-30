@@ -12,9 +12,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Blank038
@@ -23,7 +24,8 @@ import java.util.List;
 public class PlayerData {
     private final List<String> rewards, dayRewards;
     private final String name;
-    private int onlineTotal, dailyOnline, resetOfDay;
+    private int onlineTotal, dailyOnline;
+    private LocalDate resetDate;
     private boolean isNew;
 
     public PlayerData(String name) {
@@ -35,8 +37,7 @@ public class PlayerData {
         this.onlineTotal = data.getInt("Time");
         this.dailyOnline = data.getInt("Day");
         // 检测时间
-        this.resetOfDay = data.getInt("dayOfYear");
-        this.checkRewards();
+        this.initializeDate(data.getLong("resetDate", System.currentTimeMillis()));
         this.checkResetDate();
     }
 
@@ -55,14 +56,20 @@ public class PlayerData {
         for (JsonElement object : jsonObject.getAsJsonArray("dayRewards")) {
             dayRewards.add(object.getAsString());
         }
-        this.resetOfDay = jsonObject.has("dayOfYear") ? jsonObject.get("dayOfYear").getAsInt() : 0;
-        this.checkRewards();
+        this.initializeDate(jsonObject.has("resetDate") ? jsonObject.get("resetDate").getAsInt() : 0);
         this.checkResetDate();
     }
 
+    private void initializeDate(long time) {
+        Instant instant = Instant.ofEpochMilli(time);
+        ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
+        this.resetDate = zonedDateTime.toLocalDate();
+    }
 
-    public int getResetDayOfYear() {
-        return this.resetOfDay;
+    public long getResetDate() {
+        LocalDateTime localDateTime = this.resetDate.atStartOfDay();
+        Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+        return instant.toEpochMilli();
     }
 
     public boolean isNew() {
@@ -137,14 +144,19 @@ public class PlayerData {
     }
 
     public void checkResetDate() {
-        LocalDateTime localDateTime = LocalDateTime.now();
-        if (localDateTime.getDayOfYear() != this.resetOfDay) {
-            synchronized (this.rewards) {
-                this.dayRewards.clear();
-                this.setDailyOnline(0);
-                this.resetOfDay = LocalDateTime.now().getDayOfYear();
+        LocalDate now = LocalDate.now();
+        if (this.resetDate.isBefore(now)) {
+            this.resetDate = now;
+            CompletableFuture.supplyAsync(() -> {
                 this.save(true);
-            }
+                return true;
+            }).thenAcceptAsync(b -> {
+                if (b) {
+                    this.dayRewards.clear();
+                    this.setDailyOnline(0);
+                    this.save(true);
+                }
+            });
         }
     }
 

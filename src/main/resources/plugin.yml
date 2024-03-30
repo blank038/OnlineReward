@@ -1,5 +1,5 @@
 name: OnlineReward
-main: com.blank038.onlinereward.Main
+main: com.blank038.onlinereward.OnlineReward
 version: ${version}
 api-version: 1.13
 depend:

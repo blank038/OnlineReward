@@ -19,7 +19,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author Blank038
  */
 public class MySQLData extends DataInterface {
-    private final String user = OnlineReward.getInstance().getConfig().getString("save-option.user"), url = OnlineReward.getInstance().getConfig().getString("save-option.url"),
+    private final String url = OnlineReward.getInstance().getConfig().getString("save-option.url"),
+            user = OnlineReward.getInstance().getConfig().getString("save-option.user"),
             password = OnlineReward.getInstance().getConfig().getString("save-option.password");
 
     public MySQLData() {
@@ -89,7 +90,7 @@ public class MySQLData extends DataInterface {
         JsonArray dayRewards = new JsonArray();
         data.getDayRewards().forEach(dayRewards::add);
         jsonObject.add("dayRewards", dayRewards);
-        jsonObject.addProperty("dayOfYear", data.getResetDayOfYear());
+        jsonObject.addProperty("resetDate", data.getResetDate());
         String text = Base64Util.encode(jsonObject);
         connect((connection, statement) -> {
             String sql;

@@ -20,7 +20,7 @@ Items:
     data: 15
     name: "&f"
     lore: [ ]
-    slots: 0-9,17,18,26,27,35,36,44-53
+    slots: 0-9,17,18,26,27,35,36,44-48,50-53
   30f:
     type: DRAGONS_BREATH
     data: 0

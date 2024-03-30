@@ -76,6 +76,7 @@ public class OnlineReward extends JavaPlugin {
 
     public void loadConfig() {
         this.saveDefaultConfig();
+        this.reloadConfig();
         File data = new File(getDataFolder(), "Data");
         if (!data.exists()) {
             data.mkdir();
@@ -89,7 +90,6 @@ public class OnlineReward extends JavaPlugin {
         if (!gui.exists()) {
             this.saveResource("gui.yml", true);
         }
-        this.reloadConfig();
     }
 
     public static String replaceColor(String message) {
