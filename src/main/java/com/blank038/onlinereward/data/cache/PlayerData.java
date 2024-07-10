@@ -56,7 +56,7 @@ public class PlayerData {
         for (JsonElement object : jsonObject.getAsJsonArray("dayRewards")) {
             dayRewards.add(object.getAsString());
         }
-        this.initializeDate(jsonObject.has("resetDate") ? jsonObject.get("resetDate").getAsInt() : 0);
+        this.initializeDate(jsonObject.has("resetDate") ? jsonObject.get("resetDate").getAsLong() : 0);
         this.checkResetDate();
     }
 

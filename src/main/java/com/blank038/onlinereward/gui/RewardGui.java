@@ -101,7 +101,7 @@ public class RewardGui {
                 }
                 NBTItem nbtItem = new NBTItem(itemStack);
                 // 判断该物品是否有对应的NBT数据
-                if (nbtItem.getString("RewardKey") == null) {
+                if (!nbtItem.hasTag("RewardKey")) {
                     return;
                 }
                 Player clicker = (Player) e.getWhoClicked();

@@ -34,7 +34,6 @@ public class PlayerListener implements Listener {
         if (main.getConfig().getBoolean("save-option.pull-notify")) {
             e.getPlayer().sendMessage(OnlineReward.getString("message.sync_pull", true));
         }
-        // 创建线程
         ThreadProcessor.crateTask(main, new BlankThread(10) {
             private int count;
 
