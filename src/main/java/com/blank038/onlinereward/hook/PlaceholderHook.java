@@ -58,6 +58,11 @@ public class PlaceholderHook extends PlaceholderExpansion {
         return OnlineReward.getInstance().getDescription().getVersion();
     }
 
+    @Override
+    public boolean persist() {
+        return true;
+    }
+
     private String format(int time) {
         int day = time / 86400, hour = (time - (day * 86400)) / 3600,
                 minute = (time - (day * 86400) - (hour * 3600)) / 60,
