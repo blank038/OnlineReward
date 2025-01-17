@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Blank038
@@ -132,7 +133,7 @@ public class RewardGui {
                         return;
                     }
                     CommonData.DATA_MAP.get(clicker.getName()).addReward(key);
-                    PlayerUtil.performCommands(clicker,  section.getStringList("commands"));
+                    PlayerUtil.performCommands(clicker, getCommands(section, clicker));
                     clicker.sendMessage(OnlineReward.getString("message.gotten_reward", true));
                 } else {
                     clicker.closeInventory();
@@ -143,12 +144,40 @@ public class RewardGui {
         model.openInventory(player);
     }
 
+    private static List<String> getCommands(ConfigurationSection section, Player player) {
+        if (section.contains("override")) {
+            ConfigurationSection overrideSection = section.getConfigurationSection("override");
+            List<RewardEntry> entries = overrideSection.getKeys(false).stream()
+                    .map((v) -> new RewardEntry(overrideSection.getConfigurationSection(v)))
+                    .filter((entry) -> entry.permission == null || player.hasPermission(entry.permission))
+                    .collect(Collectors.toList());
+            if (entries.isEmpty()) {
+                return section.getStringList("commands");
+            }
+            entries.sort((entry1, entry2) -> Integer.compare(entry2.priority, entry1.priority));
+            return entries.get(0).commands;
+        }
+        return section.getStringList("commands");
+    }
+
     private static Material getMaterial(String name) {
         try {
             return Material.valueOf(name);
         } catch (Exception ignored) {
             OnlineReward.getInstance().getLogger().info("物品类型读取异常: " + name);
             return Material.STONE;
+        }
+    }
+
+    private static class RewardEntry {
+        private final int priority;
+        private final String permission;
+        private final List<String> commands;
+
+        public RewardEntry(ConfigurationSection section) {
+            this.priority = section.getInt("priority");
+            this.permission = section.getString("permission");
+            this.commands = section.getStringList("commands");
         }
     }
 }

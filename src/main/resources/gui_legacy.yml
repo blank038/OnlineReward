@@ -3,9 +3,9 @@ Inventory:
   title: "&8&n每日在线奖励"
 Items:
   head:
-    type: PLAYER_HEAD
+    type: SKULL_ITEM
     amount: 1
-    data: 0
+    data: 3
     custom-data: 0
     name: "&a个人信息"
     lore:
@@ -15,14 +15,14 @@ Items:
       - " "
     slot: 49
   fg:
-    type: BLACK_STAINED_GLASS_PANE
+    type: STAINED_GLASS_PANE
     amount: 1
     data: 15
     name: "&f"
     lore: [ ]
     slots: 0-9,17,18,26,27,35,36,44-48,50-53
   30f:
-    type: DRAGON_BREATH
+    type: DRAGONS_BREATH
     data: 0
     amount: 3
     name: "&a30分钟"
@@ -63,7 +63,7 @@ Items:
         commands:
           - "console:say %player% 领取了 VIP-2 奖励."
   60f:
-    type: DRAGON_BREATH
+    type: DRAGONS_BREATH
     data: 0
     amount: 6
     name: "&a60分钟"
@@ -86,7 +86,7 @@ Items:
       - "nye give %player% 钻石 20"
       - "flightcharge add %player% 200"
   90f:
-    type: DRAGON_BREATH
+    type: DRAGONS_BREATH
     data: 0
     amount: 9
     name: "&a90分钟"
@@ -109,7 +109,7 @@ Items:
       - "nye give %player% 钻石 30"
       - "flightcharge add %player% 300"
   120f:
-    type: DRAGON_BREATH
+    type: DRAGONS_BREATH
     data: 0
     amount: 12
     name: "&a120分钟"
@@ -132,7 +132,7 @@ Items:
       - "nye give %player% 钻石 40"
       - "flightcharge add %player% 500"
   150f:
-    type: DRAGON_BREATH
+    type: DRAGONS_BREATH
     data: 0
     amount: 150
     name: "&a150分钟"
@@ -157,7 +157,7 @@ Items:
       - "saveditems get tlx"
       - "flightcharge add %player% 700"
   180f:
-    type: DRAGON_BREATH
+    type: DRAGONS_BREATH
     data: 0
     amount: 18
     name: "&a180分钟"

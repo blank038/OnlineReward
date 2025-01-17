@@ -1,5 +1,6 @@
 package com.blank038.onlinereward;
 
+import com.aystudio.core.bukkit.plugin.AyPlugin;
 import com.blank038.onlinereward.api.OnlineRewardAPI;
 import com.blank038.onlinereward.command.OnlineRewardCommand;
 import com.blank038.onlinereward.data.DataContainer;
@@ -14,7 +15,6 @@ import de.tr7zw.nbtapi.utils.MinecraftVersion;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.regex.Matcher;
@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 /**
  * @author Blank038
  */
-public class OnlineReward extends JavaPlugin {
+public class OnlineReward extends AyPlugin {
     private static final Pattern PATTERN = Pattern.compile("#[A-f0-9]{6}");
     private static OnlineReward instance;
     private static OnlineRewardAPI orApi;
@@ -88,7 +88,8 @@ public class OnlineReward extends JavaPlugin {
         }
         File gui = new File(getDataFolder(), "gui.yml");
         if (!gui.exists()) {
-            this.saveResource("gui.yml", true);
+            boolean latest = MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_13_R1);
+            this.saveResource(latest ? "gui.yml" : "gui_legacy.yml", "gui.yml");
         }
     }
 

@@ -19,7 +19,6 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Blank038
- * @since 1.3.9-SNAPSHOT
  */
 public class PlayerData {
     private final List<String> rewards, dayRewards;
