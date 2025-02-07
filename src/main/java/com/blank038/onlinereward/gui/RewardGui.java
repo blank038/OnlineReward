@@ -8,7 +8,7 @@ import com.blank038.onlinereward.data.cache.CommonData;
 import com.blank038.onlinereward.data.cache.PlayerData;
 import com.blank038.onlinereward.hook.PlaceholderHook;
 import com.blank038.onlinereward.util.PlayerUtil;
-import de.tr7zw.nbtapi.NBTItem;
+import de.tr7zw.nbtapi.NBT;
 import de.tr7zw.nbtapi.utils.MinecraftVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -75,10 +75,10 @@ public class RewardGui {
                 itemMeta.setLore(itemLore);
                 itemStack.setItemMeta(itemMeta);
                 if (rewardOnlineCondition > 0) {
-                    NBTItem nbtItem = new NBTItem(itemStack);
-                    nbtItem.setString("RewardKey", key);
-                    nbtItem.setInteger("OnlineReward", rewardOnlineCondition);
-                    itemStack = nbtItem.getItem();
+                    NBT.modify(itemStack, (nbt) -> {
+                        nbt.setString("RewardKey", key);
+                        nbt.setInteger("OnlineReward", rewardOnlineCondition);
+                    });
                 }
                 if (section.isList("slots")) {
                     for (int slot : section.getIntegerList("slots")) {
@@ -100,17 +100,15 @@ public class RewardGui {
                 if (itemStack == null || itemStack.getType().equals(Material.AIR)) {
                     return;
                 }
-                NBTItem nbtItem = new NBTItem(itemStack);
-                // 判断该物品是否有对应的NBT数据
-                if (!nbtItem.hasTag("RewardKey")) {
+                String key = NBT.get(itemStack, (nbt) -> nbt.getString("RewardKey"));
+                if (key == null) {
                     return;
                 }
                 Player clicker = (Player) e.getWhoClicked();
                 if (!CommonData.DATA_MAP.containsKey(clicker.getName())) {
                     return;
                 }
-                String key = nbtItem.getString("RewardKey");
-                int onlineRewardTime = nbtItem.getInteger("OnlineReward");
+                int onlineRewardTime = NBT.get(itemStack, (nbt) -> nbt.getInteger("OnlineReward"));
                 int onlineTime = OnlineReward.getApi().getPlayerDayTime(clicker.getName()) / 60;
                 ConfigurationSection section = data.getConfigurationSection("Items." + key);
                 String permission = section.getString("permission");
