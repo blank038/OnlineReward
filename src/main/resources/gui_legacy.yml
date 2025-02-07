@@ -134,7 +134,7 @@ Items:
   150f:
     type: DRAGONS_BREATH
     data: 0
-    amount: 150
+    amount: 15
     name: "&a150分钟"
     lore:
       - " "
