@@ -6,7 +6,7 @@
 
     <groupId>com.blank038.onlinereward</groupId>
     <artifactId>OnlineReward</artifactId>
-    <version>1.7.4-BETA</version>
+    <version>1.7.5-BETA</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
