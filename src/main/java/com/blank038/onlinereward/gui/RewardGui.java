@@ -4,8 +4,9 @@ import com.aystudio.core.bukkit.util.common.CommonUtil;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.onlinereward.OnlineReward;
 import com.blank038.onlinereward.api.event.PlayerGetRewardEvent;
-import com.blank038.onlinereward.data.cache.CommonData;
+import com.blank038.onlinereward.data.DataContainer;
 import com.blank038.onlinereward.data.cache.PlayerData;
+import com.blank038.onlinereward.data.cache.RewardData;
 import com.blank038.onlinereward.hook.PlaceholderHook;
 import com.blank038.onlinereward.util.PlayerUtil;
 import de.tr7zw.nbtapi.NBT;
@@ -31,16 +32,19 @@ import java.util.stream.Collectors;
  */
 public class RewardGui {
 
-    public static void open(Player player) {
-        if (!CommonData.DATA_MAP.containsKey(player.getName())) {
+    public static void open(Player player, String guiFile) {
+        if (!DataContainer.DATA_MAP.containsKey(player.getName())) {
             return;
         }
-        // 获取玩家数据
-        PlayerData playerData = CommonData.DATA_MAP.get(player.getName());
-        int onlineMinute = playerData.getDailyOnline() / 60;
         // 打开面板
-        FileConfiguration data = YamlConfiguration.loadConfiguration(new File(OnlineReward.getInstance().getDataFolder(), "gui.yml"));
-
+        File file = new File(OnlineReward.getInstance().getDataFolder() + "/gui", guiFile + ".yml");
+        if (!file.exists()) {
+            return;
+        }
+        FileConfiguration data = YamlConfiguration.loadConfiguration(file);
+        // 获取玩家数据
+        PlayerData playerData = DataContainer.DATA_MAP.get(player.getName());
+        int onlineMinute = playerData.getDailyOnline() / 60;
         GuiModel model = new GuiModel(data.getString("Inventory.title"), data.getInt("Inventory.size"));
         model.registerListener(OnlineReward.getInstance());
         model.setCloseRemove(true);
@@ -60,12 +64,14 @@ public class RewardGui {
                 }
                 itemMeta.setDisplayName(OnlineReward.replaceColor(section.getString("name")));
                 List<String> itemLore = new ArrayList<>();
-                int rewardOnlineCondition = section.getInt("online");
+                String rewardKey = section.getString("reward");
+                RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(rewardKey);
+                int rewardOnlineCondition = rewardData == null ? 0 : rewardData.getOnline();
                 // 获取领取状态
                 String status = "";
                 if (rewardOnlineCondition > 0) {
                     status = OnlineReward.getString("reward-status." + (onlineMinute >= rewardOnlineCondition
-                            ? (playerData.hasDayReward(key) ? "1" : "2") : "3"));
+                            ? (playerData.hasDayReward(rewardKey) ? "1" : "2") : "3"));
                 }
                 for (String lore : section.getStringList("lore")) {
                     itemLore.add(PlaceholderHook.format(player, OnlineReward.replaceColor(lore))
@@ -74,10 +80,9 @@ public class RewardGui {
 
                 itemMeta.setLore(itemLore);
                 itemStack.setItemMeta(itemMeta);
-                if (rewardOnlineCondition > 0) {
+                if (rewardData != null) {
                     NBT.modify(itemStack, (nbt) -> {
-                        nbt.setString("RewardKey", key);
-                        nbt.setInteger("OnlineReward", rewardOnlineCondition);
+                        nbt.setString("RewardKey", rewardKey);
                     });
                 }
                 if (section.isList("slots")) {
@@ -105,22 +110,22 @@ public class RewardGui {
                     return;
                 }
                 Player clicker = (Player) e.getWhoClicked();
-                if (!CommonData.DATA_MAP.containsKey(clicker.getName())) {
+                if (!DataContainer.DATA_MAP.containsKey(clicker.getName())) {
                     return;
                 }
-                int onlineRewardTime = NBT.get(itemStack, (nbt) -> nbt.getInteger("OnlineReward"));
+                RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(key);
+                int onlineRewardTime = rewardData.getOnline();
                 int onlineTime = OnlineReward.getApi().getPlayerDayTime(clicker.getName()) / 60;
-                ConfigurationSection section = data.getConfigurationSection("Items." + key);
-                String permission = section.getString("permission");
+                String permission = rewardData.getPermission();
                 if (permission != null && !permission.isEmpty() && !player.hasPermission(permission)) {
                     clicker.sendMessage(OnlineReward.getString("message.permission-denied", true));
                     return;
                 }
-                if (onlineTime >= onlineRewardTime && !CommonData.DATA_MAP.get(clicker.getName()).hasDayReward(key)) {
+                if (onlineTime >= onlineRewardTime && !DataContainer.DATA_MAP.get(clicker.getName()).hasDayReward(key)) {
                     int count = (int) Arrays.stream(clicker.getInventory().getContents())
                             .filter((s) -> s == null || s.getType() == Material.AIR)
                             .count();
-                    if (count < section.getInt("need-empty-slots")) {
+                    if (count < rewardData.getNeedEmptySlots()) {
                         clicker.sendMessage(OnlineReward.getString("message.need_empty_slots")
                                 .replace("%count%", String.valueOf(count)));
                         return;
@@ -130,8 +135,8 @@ public class RewardGui {
                     if (event.isCancelled()) {
                         return;
                     }
-                    CommonData.DATA_MAP.get(clicker.getName()).addReward(key);
-                    PlayerUtil.performCommands(clicker, getCommands(section, clicker));
+                    DataContainer.DATA_MAP.get(clicker.getName()).addReward(key);
+                    PlayerUtil.performCommands(clicker, getCommands(rewardData, clicker));
                     clicker.sendMessage(OnlineReward.getString("message.gotten_reward", true));
                 } else {
                     clicker.closeInventory();
@@ -142,20 +147,18 @@ public class RewardGui {
         model.openInventory(player);
     }
 
-    private static List<String> getCommands(ConfigurationSection section, Player player) {
-        if (section.contains("override")) {
-            ConfigurationSection overrideSection = section.getConfigurationSection("override");
-            List<RewardEntry> entries = overrideSection.getKeys(false).stream()
-                    .map((v) -> new RewardEntry(overrideSection.getConfigurationSection(v)))
-                    .filter((entry) -> entry.permission == null || player.hasPermission(entry.permission))
-                    .collect(Collectors.toList());
-            if (entries.isEmpty()) {
-                return section.getStringList("commands");
-            }
-            entries.sort((entry1, entry2) -> Integer.compare(entry2.priority, entry1.priority));
-            return entries.get(0).commands;
+    public static List<String> getCommands(RewardData rewardData, Player player) {
+        if (rewardData.getRewardNodes().isEmpty()) {
+            return rewardData.getDefaultCommands();
         }
-        return section.getStringList("commands");
+        List<RewardData.RewardNode> nodes = rewardData.getRewardNodes().values().stream()
+                .filter((entry) -> entry.getPermission() == null || player.hasPermission(entry.getPermission()))
+                .collect(Collectors.toList());
+        if (nodes.isEmpty()) {
+            return rewardData.getDefaultCommands();
+        }
+        nodes.sort((entry1, entry2) -> Integer.compare(entry2.getPriority(), entry1.getPriority()));
+        return nodes.get(0).getCommands();
     }
 
     private static Material getMaterial(String name) {
@@ -164,18 +167,6 @@ public class RewardGui {
         } catch (Exception ignored) {
             OnlineReward.getInstance().getLogger().info("物品类型读取异常: " + name);
             return Material.STONE;
-        }
-    }
-
-    private static class RewardEntry {
-        private final int priority;
-        private final String permission;
-        private final List<String> commands;
-
-        public RewardEntry(ConfigurationSection section) {
-            this.priority = section.getInt("priority");
-            this.permission = section.getString("permission");
-            this.commands = section.getStringList("commands");
         }
     }
 }

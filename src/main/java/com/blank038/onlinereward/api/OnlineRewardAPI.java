@@ -1,7 +1,7 @@
 package com.blank038.onlinereward.api;
 
 import com.blank038.onlinereward.OnlineReward;
-import com.blank038.onlinereward.data.cache.CommonData;
+import com.blank038.onlinereward.data.DataContainer;
 import com.blank038.onlinereward.data.cache.PlayerData;
 
 /**
@@ -16,11 +16,11 @@ public class OnlineRewardAPI {
     }
 
     public int getPlayerOnlineTime(String name) {
-        return (CommonData.DATA_MAP.containsKey(name) ? CommonData.DATA_MAP.get(name).getOnlineTime() : this.getPlayerData(name, "Time"));
+        return (DataContainer.DATA_MAP.containsKey(name) ? DataContainer.DATA_MAP.get(name).getOnlineTime() : this.getPlayerData(name, "Time"));
     }
 
     public int getPlayerDayTime(String name) {
-        return (CommonData.DATA_MAP.containsKey(name) ? CommonData.DATA_MAP.get(name).getDailyOnline() : this.getPlayerData(name, "Day"));
+        return (DataContainer.DATA_MAP.containsKey(name) ? DataContainer.DATA_MAP.get(name).getDailyOnline() : this.getPlayerData(name, "Day"));
     }
 
     public int getPlayerData(String name, String key) {

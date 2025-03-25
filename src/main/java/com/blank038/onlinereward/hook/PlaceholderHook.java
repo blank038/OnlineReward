@@ -1,7 +1,7 @@
 package com.blank038.onlinereward.hook;
 
 import com.blank038.onlinereward.OnlineReward;
-import com.blank038.onlinereward.data.cache.CommonData;
+import com.blank038.onlinereward.data.DataContainer;
 import com.blank038.onlinereward.data.cache.PlayerData;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -21,10 +21,10 @@ public class PlaceholderHook extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player p, String params) {
-        if (p == null || !CommonData.DATA_MAP.containsKey(p.getName())) {
+        if (p == null || !DataContainer.DATA_MAP.containsKey(p.getName())) {
             return "";
         }
-        PlayerData playerData = CommonData.DATA_MAP.get(p.getName());
+        PlayerData playerData = DataContainer.DATA_MAP.get(p.getName());
         switch (params) {
             case "day":
                 return String.valueOf(playerData.getDailyOnline() / 60);

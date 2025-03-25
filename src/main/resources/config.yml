@@ -18,6 +18,7 @@ message:
   sync_pull: "&f正在同步在线奖励数据, 请稍等!"
   sync_finish: "&f同步完成."
   pls_wait_sync: "请等待同步结束."
+  pls_enter_reward_key: "请输入奖励编号."
   reward_info:
     - "§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-"
     - " "
@@ -36,7 +37,10 @@ message:
   permission-denied: "你没有权限领取这个奖励."
   not-have-perms: "你没有权限这么做."
   need_empty_slots: "背包需要有 %count% 个空槽才能领取这个奖励."
+  not_found_reward: "没有找到对应奖励."
   reload: "插件配置重载完成!"
+# 默认 GUI
+default-gui: "default"
 # 奖励状态设定
 reward-status:
   1: "&a已领取"

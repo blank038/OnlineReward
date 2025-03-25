@@ -37,31 +37,7 @@ Items:
       - " &a点击领取该奖励&f(%status%&f) "
       - " "
     slot: 20
-    # 玩家需在线多少分钟才能领取
-    online: 30
-    # 玩家背包需要有多少空槽才能领取
-    need-empty-slots: 4
-    # 领取执行的命令，默认 op 身份，如果需要后台执行在命令开头增加 console: 例如 console:give %player% STONE 1
-    commands:
-      - "give %player% PIXELMON_POKE_BALL 32"
-      - "money give %player% 1000"
-      - "nye give %player% 钻石 10"
-      - "flightcharge add %player% 100"
-    # 领取这个奖励所需权限
-    permission: "or.vip.30f"
-    # 奖励覆盖, 当玩家有指定权限时, 领取的是指定奖励
-    override:
-      vip1:
-        permission: "onlinereward.vip1"
-        # priority 越大优先级越高
-        priority: 0
-        commands:
-          - "console:say %player% 领取了 VIP-1 奖励."
-      vip2:
-        permission: "onlinereward.vip2"
-        priority: 1
-        commands:
-          - "console:say %player% 领取了 VIP-2 奖励."
+    reward: "example-30"
   60f:
     type: DRAGON_BREATH
     data: 0
@@ -78,13 +54,7 @@ Items:
       - " &a点击领取该奖励&f(%status%&f) "
       - " "
     slot: 22
-    online: 60
-    need-empty-slots: 4
-    commands:
-      - "give %player% PIXELMON_POKE_BALL 32"
-      - "money give %player% 2000"
-      - "nye give %player% 钻石 20"
-      - "flightcharge add %player% 200"
+    reward: "example-60"
   90f:
     type: DRAGON_BREATH
     data: 0
@@ -101,13 +71,7 @@ Items:
       - " &a点击领取该奖励&f(%status%&f) "
       - " "
     slot: 24
-    online: 90
-    need-empty-slots: 4
-    commands:
-      - "give %player% PIXELMON_POKE_BALL 32"
-      - "money give %player% 3000"
-      - "nye give %player% 钻石 30"
-      - "flightcharge add %player% 300"
+    reward: "example-90"
   120f:
     type: DRAGON_BREATH
     data: 0
@@ -124,13 +88,7 @@ Items:
       - " &a点击领取该奖励&f(%status%&f) "
       - " "
     slot: 29
-    online: 120
-    need-empty-slots: 4
-    commands:
-      - "give %player% PIXELMON_POKE_BALL 32"
-      - "money give %player% 4000"
-      - "nye give %player% 钻石 40"
-      - "flightcharge add %player% 500"
+    reward: "example-120"
   150f:
     type: DRAGON_BREATH
     data: 0
@@ -148,14 +106,7 @@ Items:
       - " &a点击领取该奖励&f(%status%&f) "
       - " "
     slot: 31
-    online: 150
-    need-empty-slots: 4
-    commands:
-      - "give %player% PIXELMON_POKE_BALL 32"
-      - "money give %player% 5000"
-      - "nye give %player% 钻石 50"
-      - "saveditems get tlx"
-      - "flightcharge add %player% 700"
+    reward: "example-150"
   180f:
     type: DRAGON_BREATH
     data: 0
@@ -174,12 +125,4 @@ Items:
       - " &a点击领取该奖励&f(%status%&f) "
       - " "
     slot: 33
-    online: 180
-    need-empty-slots: 4
-    commands:
-      - "give %player% PIXELMON_POKE_BALL 32"
-      - "money give %player% 6000"
-      - "nye give %player% 钻石 60"
-      - "givetoken %player% 1"
-      - "saveditems get tld"
-      - "flightcharge add %player% 1000"
+    reward: "example-180"

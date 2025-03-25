@@ -1,14 +1,22 @@
 package com.blank038.onlinereward.command;
 
 import com.blank038.onlinereward.OnlineReward;
-import com.blank038.onlinereward.data.cache.CommonData;
+import com.blank038.onlinereward.api.event.PlayerGetRewardEvent;
+import com.blank038.onlinereward.data.DataContainer;
+import com.blank038.onlinereward.data.cache.PlayerData;
+import com.blank038.onlinereward.data.cache.RewardData;
 import com.blank038.onlinereward.gui.RewardGui;
+import com.blank038.onlinereward.util.PlayerUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.Arrays;
 
 /**
  * @author Blank038
@@ -18,13 +26,23 @@ public class OnlineRewardCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof ConsoleCommandSender || CommonData.DATA_MAP.containsKey(sender.getName())) {
+        if (sender instanceof ConsoleCommandSender || DataContainer.DATA_MAP.containsKey(sender.getName())) {
             if (args.length == 0) {
                 this.gottenRewards(sender);
-            } else if ("reload".equalsIgnoreCase(args[0])) {
-                this.reloadConfig(sender);
-            } else if ("open".equalsIgnoreCase(args[0])) {
-                this.open(sender);
+                return false;
+            }
+            switch (args[0].toLowerCase()) {
+                case "reload":
+                    this.reloadConfig(sender);
+                    break;
+                case "open":
+                    this.open(sender, args);
+                    break;
+                case "get":
+                    this.get(sender, args);
+                    break;
+                default:
+                    break;
             }
         } else {
             sender.sendMessage(OnlineReward.getString("message.pls_wait_sync", true));
@@ -36,14 +54,14 @@ public class OnlineRewardCommand implements CommandExecutor {
         if (!(sender instanceof Player)) {
             return;
         }
-        if (CommonData.DATA_MAP.containsKey(sender.getName())) {
+        if (DataContainer.DATA_MAP.containsKey(sender.getName())) {
             for (String line : this.instance.getConfig().getStringList("message.reward_info")) {
                 if (line.contains("%reward%")) {
-                    if (this.instance.getConfig().getKeys(false).isEmpty() || !CommonData.DATA_MAP.containsKey(sender.getName())) {
+                    if (this.instance.getConfig().getKeys(false).isEmpty() || !DataContainer.DATA_MAP.containsKey(sender.getName())) {
                         sender.sendMessage(OnlineReward.getString("message.reward_status.no_reward"));
                         continue;
                     }
-                    int online = CommonData.DATA_MAP.get(sender.getName()).getOnlineTime();
+                    int online = DataContainer.DATA_MAP.get(sender.getName()).getOnlineTime();
                     for (String key : this.instance.getConfig().getConfigurationSection("rewards").getKeys(false)) {
                         int need = this.instance.getConfig().getInt("rewards." + key + ".time") - online;
                         int day = need / 86400;
@@ -56,7 +74,7 @@ public class OnlineRewardCommand implements CommandExecutor {
                                 gottonStatus = OnlineReward.getString("message.reward_status.gotten"),
                                 name = this.instance.getConfig().getString("rewards." + key + ".name").replace("&", "§");
                         sender.sendMessage(OnlineReward.getString("message.reward_line").replace("%name%", name)
-                                .replace("%status%", (CommonData.DATA_MAP.get(sender.getName()).has(key) ? gottonStatus : waitStatus)));
+                                .replace("%status%", (DataContainer.DATA_MAP.get(sender.getName()).has(key) ? gottonStatus : waitStatus)));
                     }
                     continue;
                 }
@@ -76,14 +94,57 @@ public class OnlineRewardCommand implements CommandExecutor {
         }
     }
 
-    private void open(CommandSender sender) {
+    private void open(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
             return;
         }
         if (sender.hasPermission("onlinereward.open")) {
-            RewardGui.open((Player) sender);
+            String gui = args.length > 1 ? args[1] : this.instance.getConfig().getString("default-gui");
+            RewardGui.open((Player) sender, gui);
         } else {
             sender.sendMessage(OnlineReward.getString("message.not-have-perms", true));
+        }
+    }
+
+    private void get(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player) || !DataContainer.DATA_MAP.containsKey(sender.getName())) {
+            return;
+        }
+        if (!sender.hasPermission("onlinereward.open")) {
+            sender.sendMessage(OnlineReward.getString("message.not-have-perms", true));
+            return;
+        }
+        if (args.length == 1) {
+            sender.sendMessage(OnlineReward.getString("message.pls_enter_reward_key", true));
+            return;
+        }
+        RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(args[1]);
+        if (rewardData == null) {
+            sender.sendMessage(OnlineReward.getString("message.not_found_reward", true));
+            return;
+        }
+        Player player = (Player) sender;
+        PlayerData playerData = DataContainer.DATA_MAP.get(sender.getName());
+        int onlineTime = OnlineReward.getApi().getPlayerDayTime(sender.getName()) / 60;
+        if (onlineTime >= rewardData.getOnline() && !playerData.hasDayReward(args[1])) {
+            int count = (int) Arrays.stream(player.getInventory().getContents())
+                    .filter((s) -> s == null || s.getType() == Material.AIR)
+                    .count();
+            if (count < rewardData.getNeedEmptySlots()) {
+                player.sendMessage(OnlineReward.getString("message.need_empty_slots")
+                        .replace("%count%", String.valueOf(count)));
+                return;
+            }
+            PlayerGetRewardEvent event = new PlayerGetRewardEvent(player, args[1]);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                return;
+            }
+            playerData.addReward(args[1]);
+            PlayerUtil.performCommands(player, RewardGui.getCommands(rewardData, player));
+            sender.sendMessage(OnlineReward.getString("message.gotten_reward", true));
+        } else {
+            sender.sendMessage(OnlineReward.getString("message.ara", true));
         }
     }
 }

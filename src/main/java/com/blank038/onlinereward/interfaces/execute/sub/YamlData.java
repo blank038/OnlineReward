@@ -1,7 +1,7 @@
 package com.blank038.onlinereward.interfaces.execute.sub;
 
 import com.blank038.onlinereward.OnlineReward;
-import com.blank038.onlinereward.data.cache.CommonData;
+import com.blank038.onlinereward.data.DataContainer;
 import com.blank038.onlinereward.data.cache.PlayerData;
 import com.blank038.onlinereward.interfaces.execute.DataInterface;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -34,6 +34,6 @@ public class YamlData extends DataInterface {
 
     @Override
     public PlayerData get(String name) {
-        return CommonData.DATA_MAP.getOrDefault(name, new PlayerData(name));
+        return DataContainer.DATA_MAP.getOrDefault(name, new PlayerData(name));
     }
 }

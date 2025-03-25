@@ -1,7 +1,7 @@
 package com.blank038.onlinereward.interfaces.execute.sub;
 
 import com.blank038.onlinereward.OnlineReward;
-import com.blank038.onlinereward.data.cache.CommonData;
+import com.blank038.onlinereward.data.DataContainer;
 import com.blank038.onlinereward.data.cache.PlayerData;
 import com.blank038.onlinereward.interfaces.execute.DataInterface;
 
@@ -110,8 +110,8 @@ public class MySQLData extends DataInterface {
 
     @Override
     public PlayerData get(String name) {
-        if (CommonData.DATA_MAP.containsKey(name)) {
-            return CommonData.DATA_MAP.get(name);
+        if (DataContainer.DATA_MAP.containsKey(name)) {
+            return DataContainer.DATA_MAP.get(name);
         }
         AtomicReference<JsonObject> jsonObject = new AtomicReference<>();
         connect((connection, statement) -> {

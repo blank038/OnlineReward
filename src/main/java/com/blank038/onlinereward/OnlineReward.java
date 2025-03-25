@@ -4,7 +4,6 @@ import com.aystudio.core.bukkit.plugin.AyPlugin;
 import com.blank038.onlinereward.api.OnlineRewardAPI;
 import com.blank038.onlinereward.command.OnlineRewardCommand;
 import com.blank038.onlinereward.data.DataContainer;
-import com.blank038.onlinereward.data.cache.CommonData;
 import com.blank038.onlinereward.data.cache.PlayerData;
 import com.blank038.onlinereward.hook.PlaceholderHook;
 import com.blank038.onlinereward.interfaces.execute.DataInterface;
@@ -12,6 +11,7 @@ import com.blank038.onlinereward.interfaces.execute.sub.MySQLData;
 import com.blank038.onlinereward.interfaces.execute.sub.YamlData;
 import com.blank038.onlinereward.listener.PlayerListener;
 import de.tr7zw.nbtapi.utils.MinecraftVersion;
+import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -23,39 +23,30 @@ import java.util.regex.Pattern;
 /**
  * @author Blank038
  */
+@Getter
 public class OnlineReward extends AyPlugin {
     private static final Pattern PATTERN = Pattern.compile("#[A-f0-9]{6}");
+    @Getter
     private static OnlineReward instance;
-    private static OnlineRewardAPI orApi;
+    @Getter
+    private static OnlineRewardAPI api;
     private DataInterface dataInterface;
-
-    public static OnlineReward getInstance() {
-        return instance;
-    }
-
-    public static OnlineRewardAPI getApi() {
-        return orApi;
-    }
-
-    public DataInterface getDataInterface() {
-        return dataInterface;
-    }
 
     @Override
     public void onEnable() {
         instance = this;
-        orApi = new OnlineRewardAPI();
+        api = new OnlineRewardAPI();
         this.loadConfig();
         // 判断存储类型, 初始化存储对象
         dataInterface = "MYSQL".equalsIgnoreCase(getConfig().getString("save-option.type")) ? new MySQLData() : new YamlData();
         Bukkit.getScheduler().runTaskTimer(OnlineReward.getInstance(), () -> {
-            CommonData.DATA_MAP.forEach((key, value) -> {
+            DataContainer.DATA_MAP.forEach((key, value) -> {
                 value.addTime();
                 value.checkRewards();
                 value.checkResetDate();
             });
         }, 20L, 20L);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(OnlineReward.getInstance(), () -> CommonData.DATA_MAP.forEach((k, v) -> v.save(true)), 1200L, 1200L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(OnlineReward.getInstance(), () -> DataContainer.DATA_MAP.forEach((k, v) -> v.save(true)), 1200L, 1200L);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceholderHook().register();
@@ -69,7 +60,7 @@ public class OnlineReward extends AyPlugin {
 
     @Override
     public void onDisable() {
-        for (PlayerData pd : CommonData.DATA_MAP.values()) {
+        for (PlayerData pd : DataContainer.DATA_MAP.values()) {
             pd.save(false);
         }
     }
@@ -81,16 +72,17 @@ public class OnlineReward extends AyPlugin {
         if (!data.exists()) {
             data.mkdir();
         }
-        if (CommonData.DATA_MAP.isEmpty()) {
+        if (DataContainer.DATA_MAP.isEmpty()) {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                CommonData.DATA_MAP.put(player.getName(), new PlayerData(player.getName()));
+                DataContainer.DATA_MAP.put(player.getName(), new PlayerData(player.getName()));
             }
         }
-        File gui = new File(getDataFolder(), "gui.yml");
+        File gui = new File(getDataFolder(), "gui");
         if (!gui.exists()) {
             boolean latest = MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_13_R1);
-            this.saveResource(latest ? "gui.yml" : "gui_legacy.yml", "gui.yml");
+            this.saveResource(latest ? "gui/default.yml" : "gui/default_legacy.yml", "gui/default.yml");
         }
+        DataContainer.init();
     }
 
     public static String replaceColor(String message) {
