@@ -52,7 +52,8 @@ papi-format: "%d% 天 %h% 时 %m% 分 %s% 秒"
 placeholder:
   gotten:
     yes: "已领取"
-    no: "条件不满足或未领取"
+    no: "条件不满足"
+    wait: "未领取"
 # 奖励列表, 每个礼包玩家都只能领取一次
 rewards:
   test:

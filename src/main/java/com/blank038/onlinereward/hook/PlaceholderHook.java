@@ -3,6 +3,7 @@ package com.blank038.onlinereward.hook;
 import com.blank038.onlinereward.OnlineReward;
 import com.blank038.onlinereward.data.DataContainer;
 import com.blank038.onlinereward.data.cache.PlayerData;
+import com.blank038.onlinereward.data.cache.RewardData;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.ChatColor;
@@ -38,7 +39,16 @@ public class PlaceholderHook extends PlaceholderExpansion {
                 break;
         }
         if (params.startsWith("is_gotten_")) {
-            return OnlineReward.getString("placeholder.gotten." + playerData.hasDayReward(params.substring(10)));
+            String rewardKey = params.substring(10);
+            if (playerData.hasDayReward(rewardKey)) {
+                return OnlineReward.getString("placeholder.gotten.yes");
+            }
+            RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(rewardKey);
+            int minute = playerData.getDailyOnline() / 60;
+            if (rewardData != null && minute >= rewardData.getOnline()) {
+                return OnlineReward.getString("placeholder.gotten.wait");
+            }
+            return OnlineReward.getString("placeholder.gotten.no");
         }
         return "";
     }
