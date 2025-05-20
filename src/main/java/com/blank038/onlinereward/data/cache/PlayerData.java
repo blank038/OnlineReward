@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 public class PlayerData {
     private final List<String> rewards, dayRewards;
     private final String name;
+    private long recordTime = System.currentTimeMillis();
     private int onlineTotal, dailyOnline;
     private LocalDate resetDate;
     private boolean isNew;
@@ -100,8 +101,11 @@ public class PlayerData {
     }
 
     public void addTime() {
-        this.setOnlineTime(this.getOnlineTime() + 1);
-        this.setDailyOnline(this.getDailyOnline() + 1);
+        long current = System.currentTimeMillis() - recordTime;
+        int increase = Math.max(1, (int) (current / 1000L));
+        this.setOnlineTime(this.getOnlineTime() + increase);
+        this.setDailyOnline(this.getDailyOnline() + increase);
+        this.recordTime = current;
     }
 
     public void addReward(String key) {

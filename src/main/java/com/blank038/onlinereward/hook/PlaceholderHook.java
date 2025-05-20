@@ -41,14 +41,14 @@ public class PlaceholderHook extends PlaceholderExpansion {
         if (params.startsWith("is_gotten_")) {
             String rewardKey = params.substring(10);
             if (playerData.hasDayReward(rewardKey)) {
-                return OnlineReward.getString("placeholder.gotten.yes");
+                return OnlineReward.getString("placeholder.gotten.true");
             }
             RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(rewardKey);
             int minute = playerData.getDailyOnline() / 60;
             if (rewardData != null && minute >= rewardData.getOnline()) {
                 return OnlineReward.getString("placeholder.gotten.wait");
             }
-            return OnlineReward.getString("placeholder.gotten.no");
+            return OnlineReward.getString("placeholder.gotten.false");
         }
         return "";
     }
