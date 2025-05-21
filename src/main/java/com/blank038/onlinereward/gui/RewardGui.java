@@ -48,6 +48,7 @@ public class RewardGui {
         GuiModel model = new GuiModel(data.getString("Inventory.title"), data.getInt("Inventory.size"));
         model.registerListener(OnlineReward.getInstance());
         model.setCloseRemove(true);
+        List<String> rewards = new ArrayList<>();
         if (data.getKeys(false).contains("Items")) {
             for (String key : data.getConfigurationSection("Items").getKeys(false)) {
                 // 获取配置节点
@@ -84,18 +85,14 @@ public class RewardGui {
                     NBT.modify(itemStack, (nbt) -> {
                         nbt.setString("RewardKey", rewardKey);
                     });
+                    rewards.add(rewardKey);
                 }
-                if (section.isList("slots")) {
-                    for (int slot : section.getIntegerList("slots")) {
-                        model.setItem(slot, itemStack);
-                    }
-                } else if (section.contains("slots")) {
-                    for (int i : CommonUtil.formatSlots(section.getString("slots"))) {
-                        model.setItem(i, itemStack);
-                    }
-                } else {
-                    model.setItem(section.getInt("slot"), itemStack);
+                if (section.contains("action")) {
+                    NBT.modify(itemStack, (nbt) -> {
+                        nbt.setString("OnlineRewardAction", section.getString("action"));
+                    });
                 }
+                getSlots(section).forEach((v) -> model.setItem(v, itemStack));
             }
         }
         model.execute((e) -> {
@@ -105,46 +102,64 @@ public class RewardGui {
                 if (itemStack == null || itemStack.getType().equals(Material.AIR)) {
                     return;
                 }
-                String key = NBT.get(itemStack, (nbt) -> nbt.getString("RewardKey"));
-                if (key == null) {
-                    return;
-                }
                 Player clicker = (Player) e.getWhoClicked();
                 if (!DataContainer.DATA_MAP.containsKey(clicker.getName())) {
                     return;
                 }
-                RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(key);
-                int onlineRewardTime = rewardData.getOnline();
-                int onlineTime = OnlineReward.getApi().getPlayerDayTime(clicker.getName()) / 60;
-                String permission = rewardData.getPermission();
-                if (permission != null && !permission.isEmpty() && !player.hasPermission(permission)) {
-                    clicker.sendMessage(OnlineReward.getString("message.permission-denied", true));
+                String key = NBT.get(itemStack, (nbt) -> nbt.getString("RewardKey"));
+                if (key != null) {
+
                     return;
                 }
-                if (onlineTime >= onlineRewardTime && !DataContainer.DATA_MAP.get(clicker.getName()).hasDayReward(key)) {
-                    int count = (int) Arrays.stream(clicker.getInventory().getContents())
-                            .filter((s) -> s == null || s.getType() == Material.AIR)
-                            .count();
-                    if (count < rewardData.getNeedEmptySlots()) {
-                        clicker.sendMessage(OnlineReward.getString("message.need_empty_slots")
-                                .replace("%count%", String.valueOf(count)));
-                        return;
+                String action = NBT.get(itemStack, (nbt) -> nbt.getString("OnlineRewardAction"));
+                if (action != null) {
+                    switch (action) {
+                        case "gotten_all":
+                            gottenAll(clicker, rewards);
+                            break;
+                        default:
+                            break;
                     }
-                    PlayerGetRewardEvent event = new PlayerGetRewardEvent(clicker, key);
-                    Bukkit.getPluginManager().callEvent(event);
-                    if (event.isCancelled()) {
-                        return;
-                    }
-                    DataContainer.DATA_MAP.get(clicker.getName()).addReward(key);
-                    PlayerUtil.performCommands(clicker, getCommands(rewardData, clicker));
-                    clicker.sendMessage(OnlineReward.getString("message.gotten_reward", true));
-                } else {
-                    clicker.closeInventory();
-                    clicker.sendMessage(OnlineReward.getString("message.ara", true));
                 }
             }
         });
         model.openInventory(player);
+    }
+
+    private static void gottenReward(Player clicker, String key) {
+        RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(key);
+        int onlineRewardTime = rewardData.getOnline();
+        int onlineTime = OnlineReward.getApi().getPlayerDayTime(clicker.getName()) / 60;
+        String permission = rewardData.getPermission();
+        if (permission != null && !permission.isEmpty() && !clicker.hasPermission(permission)) {
+            clicker.sendMessage(OnlineReward.getString("message.permission-denied", true));
+            return;
+        }
+        if (onlineTime >= onlineRewardTime && !DataContainer.DATA_MAP.get(clicker.getName()).hasDayReward(key)) {
+            int count = (int) Arrays.stream(clicker.getInventory().getContents())
+                    .filter((s) -> s == null || s.getType() == Material.AIR)
+                    .count();
+            if (count < rewardData.getNeedEmptySlots()) {
+                clicker.sendMessage(OnlineReward.getString("message.need_empty_slots")
+                        .replace("%count%", String.valueOf(count)));
+                return;
+            }
+            PlayerGetRewardEvent event = new PlayerGetRewardEvent(clicker, key);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                return;
+            }
+            DataContainer.DATA_MAP.get(clicker.getName()).addReward(key);
+            PlayerUtil.performCommands(clicker, getCommands(rewardData, clicker));
+            clicker.sendMessage(OnlineReward.getString("message.gotten_reward", true));
+        } else {
+            clicker.closeInventory();
+            clicker.sendMessage(OnlineReward.getString("message.ara", true));
+        }
+    }
+
+    private static void gottenAll(Player clicker, List<String> rewardKeys) {
+        rewardKeys.forEach((k) -> gottenReward(clicker, k));
     }
 
     public static List<String> getCommands(RewardData rewardData, Player player) {
@@ -168,5 +183,17 @@ public class RewardGui {
             OnlineReward.getInstance().getLogger().info("物品类型读取异常: " + name);
             return Material.STONE;
         }
+    }
+
+    private static List<Integer> getSlots(ConfigurationSection section) {
+        List<Integer> result = new ArrayList<>();
+        if (section.isList("slots")) {
+            result.addAll(section.getIntegerList("slots"));
+        } else if (section.contains("slots")) {
+            result.addAll(Arrays.asList(CommonUtil.formatSlots(section.getString("slots"))));
+        } else {
+            result.add(section.getInt("slot"));
+        }
+        return result;
     }
 }
