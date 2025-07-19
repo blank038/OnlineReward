@@ -105,7 +105,7 @@ public class PlayerData {
         int increase = Math.max(1, (int) (current / 1000L));
         this.setOnlineTime(this.getOnlineTime() + increase);
         this.setDailyOnline(this.getDailyOnline() + increase);
-        this.recordTime = current;
+        this.recordTime = System.currentTimeMillis();
     }
 
     public void addReward(String key) {
