@@ -1,5 +1,6 @@
 package com.blank038.onlinereward;
 
+import cn.yvmou.ylib.YLib;
 import com.aystudio.core.bukkit.plugin.AyPlugin;
 import com.blank038.onlinereward.api.OnlineRewardAPI;
 import com.blank038.onlinereward.command.OnlineRewardCommand;
@@ -31,22 +32,28 @@ public class OnlineReward extends AyPlugin {
     @Getter
     private static OnlineRewardAPI api;
     private DataInterface dataInterface;
+    private static YLib yLib;
+
+    public static YLib getYLib() {
+        return yLib;
+    }
 
     @Override
     public void onEnable() {
+        yLib = new YLib(this);
         instance = this;
         api = new OnlineRewardAPI();
         this.loadConfig();
         // 判断存储类型, 初始化存储对象
         dataInterface = "MYSQL".equalsIgnoreCase(getConfig().getString("save-option.type")) ? new MySQLData() : new YamlData();
-        Bukkit.getScheduler().runTaskTimer(OnlineReward.getInstance(), () -> {
+       getYLib().getSchedulerDogTools().runTaskTimer(OnlineReward.getInstance(), () -> {
             DataContainer.DATA_MAP.forEach((key, value) -> {
                 value.addTime();
                 value.checkRewards();
                 value.checkResetDate();
             });
-        }, 20L, 20L);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(OnlineReward.getInstance(), () -> DataContainer.DATA_MAP.forEach((k, v) -> v.save(true)), 1200L, 1200L);
+        }, 20L, 20L, null, null);
+        getYLib().getSchedulerDogTools().runTaskTimerAsynchronously(OnlineReward.getInstance(), () -> DataContainer.DATA_MAP.forEach((k, v) -> v.save(true)), 1200L, 1200L);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceholderHook().register();

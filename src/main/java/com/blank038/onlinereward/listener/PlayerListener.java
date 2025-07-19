@@ -25,7 +25,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
         if (DataContainer.DATA_MAP.containsKey(e.getPlayer().getName())) {
-            Bukkit.getScheduler().runTaskAsynchronously(this.main, () -> DataContainer.DATA_MAP.remove(e.getPlayer().getName()).save(false));
+            OnlineReward.getYLib().getSchedulerDogTools().runTaskAsynchronously(this.main, () -> DataContainer.DATA_MAP.remove(e.getPlayer().getName()).save(false));
         }
     }
 
