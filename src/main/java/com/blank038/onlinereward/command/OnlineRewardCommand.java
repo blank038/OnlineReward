@@ -103,7 +103,7 @@ public class OnlineRewardCommand implements CommandExecutor {
         }
         if (sender.hasPermission("onlinereward.open")) {
             String gui = args.length > 1 ? args[1] : this.instance.getConfig().getString("default-gui");
-            RewardGui.open((Player) sender, gui);
+            new RewardGui((Player) sender, gui);
         } else {
             sender.sendMessage(OnlineReward.getString("message.not-have-perms", true));
         }

@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,25 +32,73 @@ import java.util.stream.Collectors;
  * @author Blank038
  */
 public class RewardGui {
+    private final List<String> rewards = new ArrayList<>();
+    private final Player player;
+    private BukkitTask bukkitTask;
+    private FileConfiguration data;
+    private GuiModel model;
 
-    public static void open(Player player, String guiFile) {
+    public RewardGui(Player player, String gui) {
+        this.player = player;
+        File file = new File(OnlineReward.getInstance().getDataFolder() + "/gui", gui + ".yml");
+        if (file.exists()) {
+            this.data = YamlConfiguration.loadConfiguration(file);
+            this.bukkitTask = Bukkit.getScheduler().runTaskTimer(OnlineReward.getInstance(), this::updateGuiItems, 20L, 20L);
+            this.open();
+        }
+    }
+
+    private void open() {
         if (!DataContainer.DATA_MAP.containsKey(player.getName())) {
             return;
         }
-        // 打开面板
-        File file = new File(OnlineReward.getInstance().getDataFolder() + "/gui", guiFile + ".yml");
-        if (!file.exists()) {
-            return;
-        }
-        FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-        // 获取玩家数据
-        PlayerData playerData = DataContainer.DATA_MAP.get(player.getName());
-        int onlineMinute = playerData.getDailyOnline() / 60;
-        GuiModel model = new GuiModel(data.getString("Inventory.title"), data.getInt("Inventory.size"));
+        model = new GuiModel(data.getString("Inventory.title"), data.getInt("Inventory.size"));
         model.registerListener(OnlineReward.getInstance());
         model.setCloseRemove(true);
-        List<String> rewards = new ArrayList<>();
+        updateGuiItems();
+        model.execute((e) -> {
+            e.setCancelled(true);
+            if (e.getClickedInventory() == e.getInventory()) {
+                ItemStack itemStack = e.getCurrentItem();
+                if (itemStack == null || itemStack.getType().equals(Material.AIR)) {
+                    return;
+                }
+                Player clicker = (Player) e.getWhoClicked();
+                if (!DataContainer.DATA_MAP.containsKey(clicker.getName())) {
+                    return;
+                }
+                String key = NBT.get(itemStack, (nbt) -> nbt.getString("RewardKey"));
+                if (key != null) {
+                    gottenReward(clicker, key);
+                    return;
+                }
+                String action = NBT.get(itemStack, (nbt) -> nbt.getString("OnlineRewardAction"));
+                if (action != null) {
+                    switch (action) {
+                        case "gotten_all":
+                            gottenAll(clicker, rewards);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        });
+        model.onClose((e) -> {
+            if (bukkitTask != null) {
+                bukkitTask.cancel();
+            }
+        });
+        model.openInventory(player);
+    }
+
+    private void updateGuiItems() {
+        if (model == null) {
+            return;
+        }
         if (data.getKeys(false).contains("Items")) {
+            PlayerData playerData = DataContainer.DATA_MAP.get(player.getName());
+            int onlineMinute = playerData.getDailyOnline() / 60;
             for (String key : data.getConfigurationSection("Items").getKeys(false)) {
                 // 获取配置节点
                 ConfigurationSection section = data.getConfigurationSection("Items." + key);
@@ -95,39 +144,13 @@ public class RewardGui {
                 getSlots(section).forEach((v) -> model.setItem(v, itemStack));
             }
         }
-        model.execute((e) -> {
-            e.setCancelled(true);
-            if (e.getClickedInventory() == e.getInventory()) {
-                ItemStack itemStack = e.getCurrentItem();
-                if (itemStack == null || itemStack.getType().equals(Material.AIR)) {
-                    return;
-                }
-                Player clicker = (Player) e.getWhoClicked();
-                if (!DataContainer.DATA_MAP.containsKey(clicker.getName())) {
-                    return;
-                }
-                String key = NBT.get(itemStack, (nbt) -> nbt.getString("RewardKey"));
-                if (key != null) {
-
-                    return;
-                }
-                String action = NBT.get(itemStack, (nbt) -> nbt.getString("OnlineRewardAction"));
-                if (action != null) {
-                    switch (action) {
-                        case "gotten_all":
-                            gottenAll(clicker, rewards);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        });
-        model.openInventory(player);
     }
 
     private static void gottenReward(Player clicker, String key) {
         RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(key);
+        if (rewardData == null) {
+            return;
+        }
         int onlineRewardTime = rewardData.getOnline();
         int onlineTime = OnlineReward.getApi().getPlayerDayTime(clicker.getName()) / 60;
         String permission = rewardData.getPermission();
