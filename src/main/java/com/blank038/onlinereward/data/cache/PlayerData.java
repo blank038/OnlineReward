@@ -101,8 +101,9 @@ public class PlayerData {
     }
 
     public void addTime() {
-        long current = System.currentTimeMillis() - recordTime;
-        int increase = Math.max(1, (int) (current / 1000L));
+        long current = System.currentTimeMillis();
+        long diff = current - recordTime;
+        int increase = Math.max(1, (int) (diff / 1000L));
         this.setOnlineTime(this.getOnlineTime() + increase);
         this.setDailyOnline(this.getDailyOnline() + increase);
         this.recordTime = current;
