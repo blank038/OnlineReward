@@ -19,6 +19,9 @@ message:
   sync_finish: "&f同步完成."
   pls_wait_sync: "请等待同步结束."
   pls_enter_reward_key: "请输入奖励编号."
+  pls-enter-player-name: "请输入玩家名."
+  pls-enter-online-value: "请输入要设置的在线时长, 单位为秒."
+  player-offline: "玩家不在线或数据未加载完成."
   reward_info:
     - "§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-§c§m§l-§6§m§l-§e§m§l-§a§m§l-§b§m§l-"
     - " "
@@ -38,6 +41,7 @@ message:
   not-have-perms: "你没有权限这么做."
   need_empty_slots: "背包需要有 %count% 个空槽才能领取这个奖励."
   not_found_reward: "没有找到对应奖励."
+  set-daily: "成功设置玩家在线时长."
   reload: "插件配置重载完成!"
 # 默认 GUI
 default-gui: "default"

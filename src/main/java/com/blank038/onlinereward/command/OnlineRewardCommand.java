@@ -41,6 +41,9 @@ public class OnlineRewardCommand implements CommandExecutor {
                 case "get":
                     this.get(sender, args);
                     break;
+                case "setdaily":
+                    this.setDaily(sender, args);
+                    break;
                 default:
                     break;
             }
@@ -54,34 +57,34 @@ public class OnlineRewardCommand implements CommandExecutor {
         if (!(sender instanceof Player)) {
             return;
         }
-        if (DataContainer.DATA_MAP.containsKey(sender.getName())) {
-            for (String line : this.instance.getConfig().getStringList("message.reward_info")) {
-                if (line.contains("%reward%")) {
-                    if (this.instance.getConfig().getKeys(false).isEmpty() || !DataContainer.DATA_MAP.containsKey(sender.getName())) {
-                        sender.sendMessage(OnlineReward.getString("message.reward_status.no_reward"));
-                        continue;
-                    }
-                    int online = DataContainer.DATA_MAP.get(sender.getName()).getOnlineTime();
-                    for (String key : this.instance.getConfig().getConfigurationSection("rewards").getKeys(false)) {
-                        int need = this.instance.getConfig().getInt("rewards." + key + ".time") - online;
-                        int day = need / 86400;
-                        int hour = (need - (day * 86400)) / 3600;
-                        int minute = (need - (day * 86400) - (hour * 3600)) / 60;
-                        int second = (need - (day * 86400) - (hour * 3600) - (minute * 60));
-                        String waitStatus = OnlineReward.getString("message.reward_status.wait").replace("%day%", String.valueOf(day))
-                                .replace("%hour%", String.valueOf(hour)).replace("%minute%", String.valueOf(minute))
-                                .replace("%second%", String.valueOf(second)),
-                                gottonStatus = OnlineReward.getString("message.reward_status.gotten"),
-                                name = this.instance.getConfig().getString("rewards." + key + ".name").replace("&", "§");
-                        sender.sendMessage(OnlineReward.getString("message.reward_line").replace("%name%", name)
-                                .replace("%status%", (DataContainer.DATA_MAP.get(sender.getName()).has(key) ? gottonStatus : waitStatus)));
-                    }
-                    continue;
-                }
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
-            }
-        } else {
+        if (!DataContainer.DATA_MAP.containsKey(sender.getName())) {
             sender.sendMessage(OnlineReward.getString("message.on-sync", true));
+            return;
+        }
+        for (String line : this.instance.getConfig().getStringList("message.reward_info")) {
+            if (!line.contains("%reward%")) {
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
+                continue;
+            }
+            if (this.instance.getConfig().getKeys(false).isEmpty() || !DataContainer.DATA_MAP.containsKey(sender.getName())) {
+                sender.sendMessage(OnlineReward.getString("message.reward_status.no_reward"));
+                continue;
+            }
+            int online = DataContainer.DATA_MAP.get(sender.getName()).getOnlineTime();
+            for (String key : this.instance.getConfig().getConfigurationSection("rewards").getKeys(false)) {
+                int need = this.instance.getConfig().getInt("rewards." + key + ".time") - online;
+                int day = need / 86400;
+                int hour = (need - (day * 86400)) / 3600;
+                int minute = (need - (day * 86400) - (hour * 3600)) / 60;
+                int second = (need - (day * 86400) - (hour * 3600) - (minute * 60));
+                String waitStatus = OnlineReward.getString("message.reward_status.wait").replace("%day%", String.valueOf(day))
+                        .replace("%hour%", String.valueOf(hour)).replace("%minute%", String.valueOf(minute))
+                        .replace("%second%", String.valueOf(second)),
+                        gottonStatus = OnlineReward.getString("message.reward_status.gotten"),
+                        name = this.instance.getConfig().getString("rewards." + key + ".name").replace("&", "§");
+                sender.sendMessage(OnlineReward.getString("message.reward_line").replace("%name%", name)
+                        .replace("%status%", (DataContainer.DATA_MAP.get(sender.getName()).has(key) ? gottonStatus : waitStatus)));
+            }
         }
     }
 
@@ -146,5 +149,27 @@ public class OnlineRewardCommand implements CommandExecutor {
         } else {
             sender.sendMessage(OnlineReward.getString("message.ara", true));
         }
+    }
+
+    private void setDaily(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("onlinereward.admin")) {
+            return;
+        }
+        if (args.length == 1) {
+            sender.sendMessage(OnlineReward.getString("message.pls-enter-player-name", true));
+            return;
+        }
+        if (args.length == 2 || !args[2].matches("\\d+")) {
+            sender.sendMessage(OnlineReward.getString("message.pls-enter-online-value", true));
+            return;
+        }
+        Player player = Bukkit.getPlayerExact(args[1]);
+        if (player == null || !player.isOnline() || !DataContainer.DATA_MAP.containsKey(player.getName())) {
+            sender.sendMessage(OnlineReward.getString("message.player-offline", true));
+            return;
+        }
+        PlayerData playerData = DataContainer.DATA_MAP.get(player.getName());
+        playerData.setDailyOnline(Integer.parseInt(args[2]));
+        sender.sendMessage(OnlineReward.getString("message.set-daily", true));
     }
 }
