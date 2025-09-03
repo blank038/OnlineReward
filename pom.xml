@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.aystudio.core</groupId>
             <artifactId>AyCore</artifactId>
-            <version>1.3.2-BETA</version>
+            <version>1.4.1-BETA</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
