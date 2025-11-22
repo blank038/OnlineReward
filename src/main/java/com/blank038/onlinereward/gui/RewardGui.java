@@ -52,7 +52,7 @@ public class RewardGui {
         if (!DataContainer.DATA_MAP.containsKey(player.getName())) {
             return;
         }
-        model = new GuiModel(data.getString("Inventory.title"), data.getInt("Inventory.size"));
+        model = new GuiModel(this.getTitle(), data.getInt("Inventory.size"));
         model.registerListener(OnlineReward.getInstance());
         model.setCloseRemove(true);
         updateGuiItems();
@@ -102,48 +102,95 @@ public class RewardGui {
             for (String key : data.getConfigurationSection("Items").getKeys(false)) {
                 // 获取配置节点
                 ConfigurationSection section = data.getConfigurationSection("Items." + key);
-                ItemStack itemStack = new ItemStack(RewardGui.getMaterial(section.getString("type")), section.getInt("amount"));
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                if (MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_13_R1)) {
-                    ((Damageable) itemMeta).setDamage((short) section.getInt("data"));
-                    if (section.contains("custom-data")) {
-                        itemMeta.setCustomModelData(section.getInt("custom-data"));
-                    }
-                } else {
-                    itemStack.setDurability((short) section.getInt("data"));
-                }
-                itemMeta.setDisplayName(OnlineReward.replaceColor(section.getString("name")));
-                List<String> itemLore = new ArrayList<>();
-                String rewardKey = section.getString("reward");
-                RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(rewardKey);
-                int rewardOnlineCondition = rewardData == null ? 0 : rewardData.getOnline();
-                // 获取领取状态
-                String status = "";
-                if (rewardOnlineCondition > 0) {
-                    status = OnlineReward.getString("reward-status." + (onlineMinute >= rewardOnlineCondition
-                            ? (playerData.hasDayReward(rewardKey) ? "1" : "2") : "3"));
-                }
-                for (String lore : section.getStringList("lore")) {
-                    itemLore.add(PlaceholderHook.format(player, OnlineReward.replaceColor(lore))
-                            .replace("%status%", status));
-                }
-
-                itemMeta.setLore(itemLore);
-                itemStack.setItemMeta(itemMeta);
-                if (rewardData != null) {
-                    NBT.modify(itemStack, (nbt) -> {
-                        nbt.setString("RewardKey", rewardKey);
-                    });
-                    rewards.add(rewardKey);
-                }
-                if (section.contains("action")) {
-                    NBT.modify(itemStack, (nbt) -> {
-                        nbt.setString("OnlineRewardAction", section.getString("action"));
-                    });
-                }
+                ItemStack itemStack = getItemStack(section, playerData, onlineMinute);
                 getSlots(section).forEach((v) -> model.setItem(v, itemStack));
             }
         }
+    }
+
+    private String getTitle() {
+        int onlineminute = this.getOnlineMinute();
+        String result = data.getString("Inventory.title");
+
+        if (data.contains("titles")) {
+            int temp = 0;
+            ConfigurationSection titleSection = data.getConfigurationSection("titles");
+            for (String key : titleSection.getKeys(false)) {
+                int minute = Integer.parseInt(key);
+                if (onlineminute >= minute && minute > temp) {
+                    temp = minute;
+                    result = titleSection.getString(key);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private ItemStack getItemStack(ConfigurationSection section, PlayerData playerData, int onlineMinute) {
+        if (section.contains("state")) {
+            return this.getStateItemStack(section.getConfigurationSection("state"), playerData, onlineMinute);
+        }
+        return this.getNormalItemStack(section, playerData, onlineMinute);
+    }
+
+    private ItemStack getNormalItemStack(ConfigurationSection section, PlayerData playerData, int onlineMinute) {
+        ItemStack itemStack = new ItemStack(RewardGui.getMaterial(section.getString("type")), section.getInt("amount"));
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_13_R1)) {
+            ((Damageable) itemMeta).setDamage((short) section.getInt("data"));
+            if (section.contains("custom-data")) {
+                itemMeta.setCustomModelData(section.getInt("custom-data"));
+            }
+        } else {
+            itemStack.setDurability((short) section.getInt("data"));
+        }
+        itemMeta.setDisplayName(OnlineReward.replaceColor(section.getString("name")));
+        List<String> itemLore = new ArrayList<>();
+        String rewardKey = section.getString("reward");
+        RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(rewardKey);
+        int rewardOnlineCondition = rewardData == null ? 0 : rewardData.getOnline();
+        // 获取领取状态
+        String status = "";
+        if (rewardOnlineCondition > 0) {
+            status = OnlineReward.getString("reward-status." + (onlineMinute >= rewardOnlineCondition
+                    ? (playerData.hasDayReward(rewardKey) ? "1" : "2") : "3"));
+        }
+        for (String lore : section.getStringList("lore")) {
+            itemLore.add(PlaceholderHook.format(player, OnlineReward.replaceColor(lore))
+                    .replace("%status%", status));
+        }
+        itemMeta.setLore(itemLore);
+        itemStack.setItemMeta(itemMeta);
+        if (rewardData != null) {
+            NBT.modify(itemStack, (nbt) -> {
+                nbt.setString("RewardKey", rewardKey);
+            });
+            rewards.add(rewardKey);
+        }
+        if (section.contains("action")) {
+            NBT.modify(itemStack, (nbt) -> {
+                nbt.setString("OnlineRewardAction", section.getString("action"));
+            });
+        }
+        return itemStack;
+    }
+
+    private ItemStack getStateItemStack(ConfigurationSection section, PlayerData playerData, int onlineMinute) {
+        String rewardKey = section.getString("reward");
+        RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(rewardKey);
+        int rewardOnlineCondition = rewardData == null ? 0 : rewardData.getOnline();
+        // 获取领取状态
+        String status = "";
+        if (rewardOnlineCondition > 0) {
+            status = onlineMinute >= rewardOnlineCondition ? (playerData.hasDayReward(rewardKey) ? "1" : "2") : "3";
+        }
+        return this.getNormalItemStack(section.getConfigurationSection(status), playerData, onlineMinute);
+    }
+
+    private int getOnlineMinute() {
+        PlayerData playerData = DataContainer.DATA_MAP.get(player.getName());
+        return playerData.getDailyOnline() / 60;
     }
 
     private static void gottenReward(Player clicker, String key) {

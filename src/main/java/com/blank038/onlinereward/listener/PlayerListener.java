@@ -1,10 +1,10 @@
 package com.blank038.onlinereward.listener;
 
+import com.aystudio.core.bukkit.AyCore;
 import com.aystudio.core.bukkit.thread.BlankThread;
 import com.aystudio.core.bukkit.thread.ThreadProcessor;
 import com.blank038.onlinereward.OnlineReward;
 import com.blank038.onlinereward.data.DataContainer;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,7 +25,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
         if (DataContainer.DATA_MAP.containsKey(e.getPlayer().getName())) {
-            Bukkit.getScheduler().runTaskAsynchronously(this.main, () -> DataContainer.DATA_MAP.remove(e.getPlayer().getName()).save(false));
+            AyCore.getPlatformApi().runTaskAsynchronously(this.main, () -> DataContainer.DATA_MAP.remove(e.getPlayer().getName()).save(false));
         }
     }
 

@@ -1,5 +1,6 @@
 package com.blank038.onlinereward;
 
+import com.aystudio.core.bukkit.AyCore;
 import com.aystudio.core.bukkit.plugin.AyPlugin;
 import com.blank038.onlinereward.api.OnlineRewardAPI;
 import com.blank038.onlinereward.command.OnlineRewardCommand;
@@ -46,7 +47,9 @@ public class OnlineReward extends AyPlugin {
                 value.checkResetDate();
             });
         }, 20L, 20L);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(OnlineReward.getInstance(), () -> DataContainer.DATA_MAP.forEach((k, v) -> v.save(true)), 1200L, 1200L);
+        AyCore.getPlatformApi().runTaskTimerAsynchronously(OnlineReward.getInstance(), () -> {
+            DataContainer.DATA_MAP.forEach((k, v) -> v.save(true));
+        }, 1200L, 1200L);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceholderHook().register();
