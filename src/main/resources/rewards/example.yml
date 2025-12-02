@@ -48,6 +48,15 @@ example-120:
     - "money give %player% 4000"
     - "nye give %player% 钻石 40"
     - "flightcharge add %player% 500"
+example-150:
+  online: 120
+  need-empty-slots: 4
+  commands:
+    - "give %player% PIXELMON_POKE_BALL 32"
+    - "money give %player% 5000"
+    - "nye give %player% 钻石 50"
+    - "saveditems get tlx"
+    - "flightcharge add %player% 700"
 example-180:
   online: 180
   need-empty-slots: 4

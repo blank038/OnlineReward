@@ -23,15 +23,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * @author Blank038
  */
 public class RewardGui {
+    private final Map<String, List<String>> itemCommands = new HashMap<>();
     private final List<String> rewards = new ArrayList<>();
     private final Player player;
     private BukkitTask bukkitTask;
@@ -68,15 +67,24 @@ public class RewardGui {
                     return;
                 }
                 String key = NBT.get(itemStack, (nbt) -> nbt.getString("RewardKey"));
-                if (key != null) {
+                if (key != null && !key.isEmpty()) {
                     gottenReward(clicker, key);
                     return;
                 }
+                // 判断按钮 commands 逻辑
+                String itemKey = NBT.get(itemStack, (nbt) -> nbt.getString("OnlineRewardItemKey"));
+                if (itemKey != null && this.itemCommands.containsKey(itemKey)) {
+                    PlayerUtil.performCommands(clicker, this.itemCommands.get(itemKey));
+                }
+                // 判断按钮 action 逻辑
                 String action = NBT.get(itemStack, (nbt) -> nbt.getString("OnlineRewardAction"));
                 if (action != null) {
                     switch (action) {
                         case "gotten_all":
                             gottenAll(clicker, rewards);
+                            break;
+                        case "close":
+                            e.getWhoClicked().closeInventory();
                             break;
                         default:
                             break;
@@ -102,7 +110,14 @@ public class RewardGui {
             for (String key : data.getConfigurationSection("Items").getKeys(false)) {
                 // 获取配置节点
                 ConfigurationSection section = data.getConfigurationSection("Items." + key);
-                ItemStack itemStack = getItemStack(section, playerData, onlineMinute);
+
+                // 判断是否含有自定义命令
+                if (section.contains("commands")) {
+                    this.itemCommands.put(key, section.getStringList("commands"));
+                }
+
+                // 设置界面物品
+                ItemStack itemStack = getItemStack(key, section, playerData, onlineMinute);
                 getSlots(section).forEach((v) -> model.setItem(v, itemStack));
             }
         }
@@ -127,14 +142,21 @@ public class RewardGui {
         return result;
     }
 
-    private ItemStack getItemStack(ConfigurationSection section, PlayerData playerData, int onlineMinute) {
-        if (section.contains("state")) {
-            return this.getStateItemStack(section.getConfigurationSection("state"), playerData, onlineMinute);
+    private ItemStack getItemStack(String key, ConfigurationSection section, PlayerData playerData, int onlineMinute) {
+        ItemStack itemStack;
+        if (section.contains("state") && section.contains("reward")) {
+            String reward = section.getString("reward");
+            itemStack = this.getStateItemStack(reward, section.getConfigurationSection("state"), playerData, onlineMinute);
+        } else {
+            itemStack = this.getNormalItemStack(section.getString("reward"), section, playerData, onlineMinute);
         }
-        return this.getNormalItemStack(section, playerData, onlineMinute);
+        NBT.modify(itemStack, (nbt) -> {
+            nbt.setString("OnlineRewardItemKey", key);
+        });
+        return itemStack;
     }
 
-    private ItemStack getNormalItemStack(ConfigurationSection section, PlayerData playerData, int onlineMinute) {
+    private ItemStack getNormalItemStack(String rewardKey, ConfigurationSection section, PlayerData playerData, int onlineMinute) {
         ItemStack itemStack = new ItemStack(RewardGui.getMaterial(section.getString("type")), section.getInt("amount"));
         ItemMeta itemMeta = itemStack.getItemMeta();
         if (MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_13_R1)) {
@@ -147,7 +169,6 @@ public class RewardGui {
         }
         itemMeta.setDisplayName(OnlineReward.replaceColor(section.getString("name")));
         List<String> itemLore = new ArrayList<>();
-        String rewardKey = section.getString("reward");
         RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(rewardKey);
         int rewardOnlineCondition = rewardData == null ? 0 : rewardData.getOnline();
         // 获取领取状态
@@ -176,8 +197,7 @@ public class RewardGui {
         return itemStack;
     }
 
-    private ItemStack getStateItemStack(ConfigurationSection section, PlayerData playerData, int onlineMinute) {
-        String rewardKey = section.getString("reward");
+    private ItemStack getStateItemStack(String rewardKey, ConfigurationSection section, PlayerData playerData, int onlineMinute) {
         RewardData rewardData = DataContainer.REWARD_DATA_MAP.get(rewardKey);
         int rewardOnlineCondition = rewardData == null ? 0 : rewardData.getOnline();
         // 获取领取状态
@@ -185,7 +205,7 @@ public class RewardGui {
         if (rewardOnlineCondition > 0) {
             status = onlineMinute >= rewardOnlineCondition ? (playerData.hasDayReward(rewardKey) ? "1" : "2") : "3";
         }
-        return this.getNormalItemStack(section.getConfigurationSection(status), playerData, onlineMinute);
+        return this.getNormalItemStack(rewardKey, section.getConfigurationSection(status), playerData, onlineMinute);
     }
 
     private int getOnlineMinute() {

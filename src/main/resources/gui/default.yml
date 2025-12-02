@@ -42,7 +42,6 @@ Items:
           - " "
           - " &a点击领取该奖励&f(%status%&f) "
           - " "
-        reward: "example-30"
       # 待领取
       2:
         type: DRAGON_BREATH
@@ -59,7 +58,6 @@ Items:
           - " "
           - " &a点击领取该奖励&f(%status%&f) "
           - " "
-        reward: "example-30"
       # 条件不足
       3:
         type: DRAGON_BREATH
@@ -76,8 +74,8 @@ Items:
           - " "
           - " &a点击领取该奖励&f(%status%&f) "
           - " "
-        reward: "example-30"
     slot: 20
+    reward: "example-30"
   60f:
     type: DRAGON_BREATH
     data: 0

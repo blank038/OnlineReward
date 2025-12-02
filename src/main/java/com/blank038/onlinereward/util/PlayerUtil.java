@@ -17,7 +17,12 @@ public class PlayerUtil {
                 .forEach((command) -> {
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
                 });
-        List<String> opCommands = commands.stream().filter((s) -> !s.startsWith("console:")).collect(Collectors.toList());
+        commands.stream().filter((c) -> c.startsWith("player:"))
+                .map((s) -> s.substring(7))
+                .forEach((command) -> {
+                    player.performCommand(command.replace("%player%", player.getName()));
+                });
+        List<String> opCommands = commands.stream().filter((s) -> !s.startsWith("console:") && !s.startsWith("player:")).collect(Collectors.toList());
         if (opCommands.isEmpty()) {
             return;
         }
